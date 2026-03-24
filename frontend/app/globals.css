@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+/* Tailwind V4 Architecture: CSS-First Configuration */
+@theme {
+  --color-navy: #1A1A2E;
+  --color-navy-light: #2B2B4A;
+  --color-accent: #E63946;
+  --color-accent-hover: #D62828;
+  
+  --font-poppins: "Poppins", sans-serif;
+  
+  --shadow-soft: 0 4px 20px rgba(26, 26, 46, 0.08);
+  --shadow-accent: 0 4px 14px rgba(230, 57, 70, 0.25);
+}
+
+@layer base {
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+  
+  body {
+    font-family: var(--font-poppins);
+    color: var(--color-navy);
+    background-color: #ffffff;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@layer components {
+  /* Common UI overrides for the premium corporate look */
+  .btn-primary {
+    @apply bg-accent text-white font-semibold py-3 px-6 rounded-lg shadow-accent hover:bg-accent-hover hover:-translate-y-0.5 transition-all duration-200;
+  }
+  
+  .card {
+    @apply bg-white rounded-xl shadow-soft border border-gray-100 overflow-hidden;
+  }
+  
+  .glass-header {
+    @apply bg-white/90 backdrop-blur-md border-b border-gray-100;
+  }
+}
