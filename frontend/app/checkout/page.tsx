@@ -18,10 +18,12 @@ function CheckoutContent() {
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'upi' | 'netbanking'>('upi');
   
   const price = parseInt(searchParams.get('price') || '0', 10);
+  const from = searchParams.get('from') || 'DEL';
   const destination = searchParams.get('destination') || '';
   const operatorNo = searchParams.get('operatorNo') || '';
   const mode = searchParams.get('mode') || 'flights';
   const seat = searchParams.get('seat') || 'Assigned at check-in';
+  const date = searchParams.get('date') || '';
 
   const handlePayment = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,8 +43,9 @@ function CheckoutContent() {
           userId: user.id || 'usr_anonymous',
           operatorMode: mode,
           operatorNo,
-          origin: 'DEL', // Hardcoded safely for workflow demo
+          origin: from,
           destination,
+          travelDate: date,
           totalFare: price + BOOKING_FEE,
           seats: seat.split(',')
         });

@@ -46,12 +46,39 @@ router.post('/lock', async (req, res) => {
 });
 
 /**
+ * PATH: /api/booking/availability
+ * DESCRIPTION: Queries PostgreSQL to find seats already booked for a specific flight/train on a specific date.
+ */
+router.get('/availability', async (req, res) => {
+  try {
+    const { operatorNo, date } = req.query;
+    if (!operatorNo || !date) return res.status(400).json({ error: 'Missing operatorNo or date query parameters.' });
+
+    const bookedSeats = await prisma.seat.findMany({
+      where: {
+        booking: {
+          operatorNo,
+          travelDate: date,
+          status: 'CONFIRMED'
+        }
+      },
+      select: { seatIdentifier: true }
+    });
+
+    res.json({ success: true, bookedSeats: bookedSeats.map(s => s.seatIdentifier) });
+  } catch (error) {
+    console.error('[Booking Microservice] Availability Check Error:', error);
+    res.status(500).json({ error: 'Failed to retrieve real-time seat availability.' });
+  }
+});
+
+/**
  * PATH: /api/booking/create
  * DESCRIPTION: Commits a final booking to PostgreSQL via Prisma after successful payment.
  */
 router.post('/create', async (req, res) => {
   try {
-    const { userId, pnr, operatorMode, operatorNo, origin, destination, totalFare, seats } = req.body;
+    const { userId, pnr, operatorMode, operatorNo, origin, destination, travelDate, totalFare, seats } = req.body;
 
     const booking = await prisma.booking.create({
       data: {
@@ -61,6 +88,7 @@ router.post('/create', async (req, res) => {
         operatorNo,
         origin,
         destination,
+        travelDate,
         totalFare: parseFloat(totalFare),
         seats: {
           create: seats.map(s => ({ seatIdentifier: s, class: 'Economy' })) // simplified for demo

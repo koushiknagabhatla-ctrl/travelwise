@@ -85,7 +85,10 @@ export default function AirportInfo() {
                 </div>
 
                 {/* Simulated Google Maps/OpenWeather button action */}
-                <button className="mt-4 w-full bg-navy hover:bg-black text-white py-3 rounded-xl font-semibold transition-colors flex items-center justify-center gap-2 text-sm">
+                <button 
+                  onClick={() => window.location.href = `/tracking?flightId=${apt.code}-CORRIDOR`}
+                  className="mt-4 w-full bg-navy hover:bg-black text-white py-3 rounded-xl font-semibold transition-colors flex items-center justify-center gap-2 text-sm"
+                >
                   <PlaneTakeoff size={16} className="text-white" /> View Flight Corridors
                 </button>
               </div>

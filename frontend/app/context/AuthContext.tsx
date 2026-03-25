@@ -56,7 +56,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Since we are running locally without real Firebase keys, we will spoof the ID token
       // structure and send it to our microservice for Postgres ingestion and JWT sealing.
       console.log('Using simulated Firebase Google Popup token...');
-      const pseudoIdToken = `mock-firebase-${Date.now()}`;
+      const pseudoIdToken = 'mock-firebase-demo-user-123';
       
       // 2. Send Firebase idToken to backend -> Receives secure httpOnly Cookie
       const response = await axios.post(`${API_URL}/auth/login`, { 

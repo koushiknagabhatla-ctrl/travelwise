@@ -26,6 +26,7 @@ model Booking {
   operatorNo   String
   origin       String
   destination  String
+  travelDate   String    // 'YYYY-MM-DD'
   totalFare    Float
   status       String    @default("CONFIRMED")
   seats        Seat[]

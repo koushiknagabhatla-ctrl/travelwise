@@ -1,11 +1,18 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { PlaneTakeoff, Train, Search, MapPin, Calendar, Users } from 'lucide-react';
+import { PlaneTakeoff, Train, Search, MapPin, Calendar, Users, ChevronDown } from 'lucide-react';
+import axios from 'axios';
 
 const AIRLINES = ['IndiGo', 'Air India', 'Vistara', 'SpiceJet', 'Akasa Air', 'GoFirst', 'Alliance Air', 'Star Air', 'Blue Dart'];
 const TRAINS = ['Indian Railways (IRCTC)'];
+
+interface Airport {
+  code: string;
+  name: string;
+  city: string;
+}
 
 export default function Home() {
   const router = useRouter();
@@ -17,10 +24,37 @@ export default function Home() {
   const [date, setDate] = useState('');
   const [passengers, setPassengers] = useState('1');
 
+  const [airports, setAirports] = useState<Airport[]>([]);
+  const [showFromDrop, setShowFromDrop] = useState(false);
+  const [showToDrop, setShowToDrop] = useState(false);
+
+  useEffect(() => {
+    const loadAirports = async () => {
+      try {
+        const res = await axios.get('http://localhost:5002/api/airports');
+        if (res.data.success) setAirports(res.data.data);
+      } catch (e) {
+        console.error("Failed to load airports");
+      }
+    };
+    loadAirports();
+  }, []);
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (!from || !to || !date) return alert('Please complete the origin, destination, and date fields.');
-    router.push(`/search?mode=${activeTab}&carrier=${encodeURIComponent(selectedCarrier)}&from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&date=${date}&pax=${passengers}`);
+    const fromCode = from.split('(')[1]?.split(')')[0] || from;
+    const toCode = to.split('(')[1]?.split(')')[0] || to;
+    router.push(`/search?mode=${activeTab}&carrier=${encodeURIComponent(selectedCarrier)}&from=${encodeURIComponent(fromCode)}&to=${encodeURIComponent(toCode)}&date=${date}&pax=${passengers}`);
+  };
+
+  const filteredAirports = (val: string) => {
+    if (!val) return airports.slice(0, 5);
+    return airports.filter(a => 
+      a.city.toLowerCase().includes(val.toLowerCase()) || 
+      a.code.toLowerCase().includes(val.toLowerCase()) ||
+      a.name.toLowerCase().includes(val.toLowerCase())
+    ).slice(0, 8);
   };
 
   return (
@@ -72,12 +106,55 @@ export default function Home() {
 
             <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-2 bg-gray-50 p-4 rounded-xl">
               <div className="flex-1 relative">
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"><MapPin size={20} /></div>
-                <input type="text" placeholder={activeTab === 'flights' ? 'Leaving from (e.g. DEL)' : 'Station from'} value={from} onChange={e => setFrom(e.target.value.toUpperCase())} className="w-full pl-12 pr-4 py-4 rounded-lg border-none focus:ring-2 focus:ring-accent outline-none font-semibold text-lg bg-white" required />
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 z-10"><MapPin size={20} /></div>
+                <input 
+                  type="text" 
+                  placeholder={activeTab === 'flights' ? 'Leaving from' : 'Station from'} 
+                  value={from} 
+                  onChange={e => { setFrom(e.target.value); setShowFromDrop(true); }}
+                  onFocus={() => setShowFromDrop(true)}
+                  className="w-full pl-12 pr-4 py-4 rounded-lg border-none focus:ring-2 focus:ring-accent outline-none font-semibold text-lg bg-white" 
+                  required 
+                />
+                {showFromDrop && (
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-soft border border-gray-100 z-50 py-1 overflow-hidden">
+                    {filteredAirports(from).map(a => (
+                      <button key={a.code} type="button" onClick={() => { setFrom(`${a.city} (${a.code})`); setShowFromDrop(false); }} className="w-full px-4 py-3 text-left hover:bg-gray-50 flex justify-between items-center transition-colors border-b border-gray-50 last:border-0">
+                        <div>
+                          <div className="font-bold text-navy">{a.city}</div>
+                          <div className="text-xs text-gray-400 font-medium">{a.name}</div>
+                        </div>
+                        <div className="font-black text-accent text-sm">{a.code}</div>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
+
               <div className="flex-1 relative">
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"><MapPin size={20} /></div>
-                <input type="text" placeholder={activeTab === 'flights' ? 'Going to (e.g. BOM)' : 'Station to'} value={to} onChange={e => setTo(e.target.value.toUpperCase())} className="w-full pl-12 pr-4 py-4 rounded-lg border-none focus:ring-2 focus:ring-accent outline-none font-semibold text-lg bg-white" required />
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 z-10"><MapPin size={20} /></div>
+                <input 
+                  type="text" 
+                  placeholder={activeTab === 'flights' ? 'Going to' : 'Station to'} 
+                  value={to} 
+                  onChange={e => { setTo(e.target.value); setShowToDrop(true); }}
+                  onFocus={() => setShowToDrop(true)}
+                  className="w-full pl-12 pr-4 py-4 rounded-lg border-none focus:ring-2 focus:ring-accent outline-none font-semibold text-lg bg-white" 
+                  required 
+                />
+                {showToDrop && (
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-soft border border-gray-100 z-50 py-1 overflow-hidden">
+                    {filteredAirports(to).map(a => (
+                      <button key={a.code} type="button" onClick={() => { setTo(`${a.city} (${a.code})`); setShowToDrop(false); }} className="w-full px-4 py-3 text-left hover:bg-gray-50 flex justify-between items-center transition-colors border-b border-gray-50 last:border-0">
+                        <div>
+                          <div className="font-bold text-navy">{a.city}</div>
+                          <div className="text-xs text-gray-400 font-medium">{a.name}</div>
+                        </div>
+                        <div className="font-black text-accent text-sm">{a.code}</div>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
               <div className="flex-1 relative">
                 <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"><Calendar size={20} /></div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, Suspense } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Plane, Train, CheckCircle2, Lock, ArrowRight } from 'lucide-react';
 import axios from 'axios';
@@ -14,11 +14,28 @@ function SeatSelectionContent() {
   const mode = searchParams.get('mode') || 'flights';
   const price = parseInt(searchParams.get('price') || '0', 10);
   const operatorNo = searchParams.get('operatorNo') || '';
+  const from = searchParams.get('from') || '';
   const destination = searchParams.get('destination') || '';
+  const date = searchParams.get('date') || '';
 
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
+  const [bookedSeats, setBookedSeats] = useState<string[]>([]);
   const [locking, setLocking] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    const fetchAvailability = async () => {
+      try {
+        const res = await axios.get(`http://localhost:5002/api/booking/availability`, {
+          params: { operatorNo, date }
+        });
+        if (res.data.success) setBookedSeats(res.data.bookedSeats);
+      } catch (e) {
+        console.error("Failed to fetch availability");
+      }
+    };
+    if (operatorNo && date) fetchAvailability();
+  }, [operatorNo, date]);
 
   // Generate 6 rows for airplanes, or specific berths for trains
   const rows = [1, 2, 3, 4, 5, 6];
@@ -47,7 +64,7 @@ function SeatSelectionContent() {
       });
       if (res.data.success) {
         const finalPrice = price * selectedSeats.length;
-        router.push(`/checkout?mode=${mode}&operatorNo=${operatorNo}&destination=${destination}&price=${finalPrice}&seat=${selectedSeats.join(',')}`);
+        router.push(`/checkout?mode=${mode}&operatorNo=${operatorNo}&from=${from}&destination=${destination}&price=${finalPrice}&seat=${selectedSeats.join(',')}&date=${date}`);
       }
     } catch (err: any) {
       setError(err.response?.data?.error || 'Failed to lock seats in Redis.');
@@ -58,8 +75,7 @@ function SeatSelectionContent() {
 
   const renderSeat = (num: string, isBestView: boolean) => {
     const isSelected = selectedSeats.includes(num);
-    // Hardcoded disabled seat simulator
-    const isBooked = num === '2B' || num === '3A' || num === '1SU';
+    const isBooked = bookedSeats.includes(num);
 
     return (
       <button

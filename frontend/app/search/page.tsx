@@ -52,7 +52,7 @@ function SearchResultsContent() {
   }, [mode, carrier, from, to, date, pax]);
 
   const handleSeatSelection = (result: TravelResult, price: number) => {
-    router.push(`/seat-selection?mode=${result.mode}&operatorNo=${result.flightNumber}&destination=${to}&price=${price}`);
+    router.push(`/seat-selection?mode=${result.mode}&operatorNo=${result.flightNumber}&from=${from}&destination=${to}&price=${price}&date=${date}`);
   };
 
   return (

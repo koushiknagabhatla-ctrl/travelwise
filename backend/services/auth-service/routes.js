@@ -30,12 +30,15 @@ router.post('/login', async (req, res) => {
       picture: mockPhoto || ''
     };
 
+    console.log('[Auth Microservice] Login requested for:', decodedToken.email);
+    
     // Upsert User in PostgreSQL Database using Prisma
     const user = await prisma.user.upsert({
       where: { firebaseUid: decodedToken.uid },
       update: { name: decodedToken.name, email: decodedToken.email, profilePhoto: decodedToken.picture },
       create: { firebaseUid: decodedToken.uid, name: decodedToken.name, email: decodedToken.email, profilePhoto: decodedToken.picture }
     });
+    console.log('[Auth Microservice] User upserted:', user.id);
 
     // Sign secure custom Microservice JWT (15 min expiry per requirements)
     const sessionToken = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET, { expiresIn: '15m' });
