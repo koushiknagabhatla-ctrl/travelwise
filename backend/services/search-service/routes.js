@@ -64,7 +64,7 @@ router.get('/', async (req, res) => {
           });
         }
       } catch (apiError) {
-         console.error('[Search Microservice] AviationStack API failed or timed out. Falling back to dynamic mock...');
+         console.error('[Search Microservice] CRITICAL: AviationStack API timed out or refused connection. Failing over to dynamic mock data.');
       }
     }
 
