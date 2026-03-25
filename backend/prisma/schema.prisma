@@ -3,8 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -32,6 +32,11 @@ model Booking {
   seats        Seat[]
   payment      Payment?
   createdAt    DateTime  @default(now())
+
+  @@index([userId])
+  @@index([operatorNo])
+  @@index([origin, destination])
+  @@index([travelDate])
 }
 
 model Seat {
@@ -40,6 +45,8 @@ model Seat {
   booking        Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
   seatIdentifier String
   class          String?  // 'Economy' | 'Business' | 'SL'
+
+  @@index([bookingId])
 }
 
 model Payment {

@@ -1,9 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const { PrismaClient } = require('@prisma/client');
+const prisma = require('../../lib/prisma');
 const redis = require('redis');
-
-const prisma = new PrismaClient();
 
 // Connect to simulated InMemory Redis Map (Removes Docker Dependency for User)
 const memoryCache = new Map();

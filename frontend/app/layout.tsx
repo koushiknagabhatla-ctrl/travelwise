@@ -10,13 +10,13 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body className="font-poppins text-navy bg-white">
+    <html lang="en" suppressHydrationWarning>
+      <body className="antialiased font-poppins relative bg-[#020617]" suppressHydrationWarning>
         <Providers>
           <Navbar />
-          <main className="min-h-screen pt-20 flex flex-col">
+          <div className="relative z-10 min-h-screen pt-20 flex flex-col">
             {children}
-          </main>
+          </div>
         </Providers>
       </body>
     </html>

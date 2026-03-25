@@ -31,15 +31,16 @@ function CheckoutContent() {
     
     setProcessing(true);
     try {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002';
       // 1. Hit Payment Microservice (Razorpay Order creation simulation)
-      const rzpRes = await axios.post('http://localhost:5002/api/payment/create-order', {
+      const rzpRes = await axios.post(`${API_URL}/api/payment/create-order`, {
         amount: price + BOOKING_FEE,
         currency: 'INR'
       });
 
       if (rzpRes.data.success) {
         // 2. Hit Booking Microservice to finalize Postgres Commit
-        await axios.post('http://localhost:5002/api/booking/create', {
+        await axios.post(`${API_URL}/api/booking/create`, {
           userId: user.id || 'usr_anonymous',
           operatorMode: mode,
           operatorNo,
@@ -61,98 +62,139 @@ function CheckoutContent() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6 text-navy">
-        <div className="bg-white p-12 text-center max-w-lg w-full rounded-3xl shadow-soft border border-gray-100 flex flex-col items-center animate-fade-up">
-          <div className="w-20 h-20 bg-green-100 text-green-500 rounded-full flex items-center justify-center mb-6 shadow-soft">
-            <CheckCircle2 size={40} className="drop-shadow-sm" />
+      <div className="min-h-screen bg-[#020617] flex items-center justify-center p-6 text-white">
+        <div className="acrylic-glass p-16 text-center max-w-xl w-full rounded-[48px] border border-white/10 flex flex-col items-center animate-fade-up shadow-2xl relative overflow-hidden">
+          <div className="absolute -top-24 -left-24 w-64 h-64 bg-green-500/10 rounded-full blur-3xl"></div>
+          
+          <div className="w-24 h-24 bg-green-500/10 text-green-400 rounded-3xl border border-green-500/20 flex items-center justify-center mb-10 shadow-lg">
+            <CheckCircle2 size={48} strokeWidth={2.5} />
           </div>
-          <h2 className="text-3xl font-black mb-3 text-navy">Booking Confirmed!</h2>
-          <p className="text-gray-500 font-medium mb-8">
-            Your {mode === 'flights' ? 'flight ✈️' : 'train 🚆'} <strong className="text-navy">{operatorNo}</strong> to <strong className="text-navy">{destination}</strong> is instantly confirmed.
-            <br />Seat(s): <strong className="text-navy">{seat.split(',').join(', ')}</strong>
-          </p>
-          <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 text-sm font-semibold text-gray-500 mb-8 flex flex-col gap-2">
-            <div>✅ ₹{(price).toLocaleString('en-IN')} routed to Carrier Nodal Acc</div>
-            <div>✅ ₹{BOOKING_FEE} platform fee collected securely</div>
-            <div className="text-xs text-gray-400 font-normal mt-1">Simulated via Razorpay Webhooks into Postgres</div>
+          
+          <h2 className="text-4xl font-black mb-4 tracking-tighter">Reservation Confirmed</h2>
+          <p className="text-gray-400 font-extrabold uppercase tracking-[0.3em] text-[10px] mb-12">Handshake Successful · Assets Allocated</p>
+          
+          <div className="w-full space-y-4 mb-12 text-left">
+            <div className="acrylic-glass p-6 rounded-3xl border border-white/5 space-y-3">
+                <div className="flex justify-between items-center"><span className="text-xs font-black text-gray-500 uppercase tracking-widest">ASSET ID</span> <span className="text-accent font-black uppercase">{operatorNo}</span></div>
+                <div className="flex justify-between items-center"><span className="text-xs font-black text-gray-500 uppercase tracking-widest">SECTOR</span> <span className="text-white font-black uppercase text-sm tracking-tight">{from} ⟫ {destination}</span></div>
+                <div className="flex justify-between items-center"><span className="text-xs font-black text-gray-500 uppercase tracking-widest">COORDINATES</span> <span className="text-white font-black uppercase">{seat.split(',').join(' · ')}</span></div>
+            </div>
+            <div className="bg-green-500/5 p-4 rounded-2xl border border-green-500/10 text-[10px] font-black text-green-400 uppercase tracking-widest text-center">
+                Blockchain Proof: razorpay_sim_{Date.now().toString(36)}
+            </div>
           </div>
-          <button onClick={() => router.push('/')} className="btn-primary w-full">Return to Dashboard</button>
+          
+          <button onClick={() => router.push('/')} className="w-full h-16 bg-white text-navy font-black rounded-2xl hover:scale-105 active:scale-95 transition-all text-sm uppercase tracking-widest">
+            Return to Command Center
+          </button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-gray-50 min-h-screen pt-24 pb-32 text-navy">
-      <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div className="bg-[#020617] min-h-screen pt-32 pb-32 text-white">
+      <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-3 gap-10">
         
         {/* PAYMENT FORMS */}
-        <div className="lg:col-span-2 bg-white rounded-3xl shadow-soft border border-gray-100 overflow-hidden flex flex-col">
-          <div className="bg-navy p-6 flex justify-between items-center text-white">
+        <div className="lg:col-span-2 acrylic-glass rounded-[40px] border border-white/5 overflow-hidden flex flex-col shadow-2xl">
+          <div className="p-8 border-b border-white/5 flex justify-between items-center">
             <div>
-              <h2 className="text-2xl font-black flex items-center gap-2"><ShieldCheck className="text-accent" /> Secure Checkout</h2>
-              <p className="text-gray-400 text-sm font-medium">PCI-DSS Compliant Gateway powered by Razorpay</p>
+              <h2 className="text-2xl font-black flex items-center gap-4 tracking-tighter">
+                <ShieldCheck className="text-accent" size={28} /> 
+                Secure Settlement
+              </h2>
+              <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.3em] mt-1">PCI-DSS Encrypted Pipeline · Razorpay Node</p>
             </div>
           </div>
 
-          <div className="flex border-b border-gray-100 bg-gray-50">
-            <button onClick={() => setPaymentMethod('upi')} className={`flex-1 flex items-center justify-center gap-2 py-4 font-bold transition-all ${paymentMethod === 'upi' ? 'bg-white text-accent border-b-2 border-accent shadow-[0_-5px_15px_rgba(0,0,0,0.03)]' : 'text-gray-400 hover:text-navy'}`}><Smartphone size={18}/> UPI App</button>
-            <button onClick={() => setPaymentMethod('card')} className={`flex-1 flex items-center justify-center gap-2 py-4 font-bold transition-all ${paymentMethod === 'card' ? 'bg-white text-accent border-b-2 border-accent shadow-[0_-5px_15px_rgba(0,0,0,0.03)]' : 'text-gray-400 hover:text-navy'}`}><CreditCard size={18}/> Debit / Credit Card</button>
-            <button onClick={() => setPaymentMethod('netbanking')} className={`flex-1 hidden md:flex items-center justify-center gap-2 py-4 font-bold transition-all ${paymentMethod === 'netbanking' ? 'bg-white text-accent border-b-2 border-accent shadow-[0_-5px_15px_rgba(0,0,0,0.03)]' : 'text-gray-400 hover:text-navy'}`}><Banknote size={18}/> Net Banking</button>
+          <div className="flex bg-white/5 border-b border-white/5">
+            {[
+                {id: 'upi', label: 'UPI INSTANT'},
+                {id: 'card', label: 'CREDIT CARD'},
+                {id: 'netbanking', label: 'NETWORK BANK'}
+            ].map((m) => (
+                <button 
+                  key={m.id}
+                  onClick={() => setPaymentMethod(m.id as any)} 
+                  className={`flex-1 py-5 font-black text-[10px] uppercase tracking-[0.3em] transition-all ${paymentMethod === m.id ? 'bg-white/5 text-accent border-b-2 border-accent' : 'text-gray-500 hover:text-white'}`}
+                >
+                  {m.label}
+                </button>
+            ))}
           </div>
 
-          <form onSubmit={handlePayment} className="p-8 flex flex-col gap-6 flex-1">
+          <form onSubmit={handlePayment} className="p-10 flex flex-col gap-10 flex-1">
             {paymentMethod === 'upi' && (
-              <div className="space-y-4 animate-fade-in">
-                <label className="text-sm font-bold text-gray-400 uppercase tracking-widest">Virtual Payment Address (VPA)</label>
-                <input type="text" placeholder="username@okicici" required className="w-full bg-gray-50 border border-gray-200 p-4 rounded-xl focus:ring-2 focus:ring-accent outline-none font-medium text-navy transition-all" />
+              <div className="space-y-6 animate-fade-in">
+                <label className="text-[10px] font-black text-gray-500 uppercase tracking-[0.4em]">VIRTUAL PAYMENT ADDRESS</label>
+                <input 
+                  type="text" 
+                  placeholder="ID@GATEWAY" 
+                  required 
+                  className="w-full bg-white/5 border border-white/10 p-5 rounded-2xl focus:border-accent outline-none font-black text-white transition-all tracking-widest placeholder:text-white/10" 
+                />
               </div>
             )}
             {paymentMethod === 'card' && (
-              <div className="space-y-6 animate-fade-in">
+              <div className="space-y-8 animate-fade-in">
                 <div>
-                  <label className="text-sm font-bold text-gray-400 uppercase tracking-widest block mb-2">Cardholder Name</label>
-                  <input type="text" placeholder="Name on Card" required className="w-full bg-gray-50 border border-gray-200 p-4 rounded-xl focus:ring-2 focus:ring-accent outline-none font-medium text-navy transition-all" />
+                  <label className="text-[10px] font-black text-gray-500 uppercase tracking-[0.4em] block mb-3">HOLDER NAME</label>
+                  <input type="text" placeholder="IDENTITY ON CARD" required className="w-full bg-white/5 border border-white/10 p-5 rounded-2xl focus:border-accent outline-none font-black text-white transition-all tracking-widest placeholder:text-white/10 uppercase" />
                 </div>
                 <div>
-                  <label className="text-sm font-bold text-gray-400 uppercase tracking-widest block mb-2">Card Number</label>
-                  <input type="text" placeholder="1234 5678 9012 3456" maxLength={19} required className="w-full bg-gray-50 border border-gray-200 p-4 rounded-xl focus:ring-2 focus:ring-accent outline-none font-medium text-navy transition-all font-mono" />
+                  <label className="text-[10px] font-black text-gray-500 uppercase tracking-[0.4em] block mb-3">CARD NUMBER</label>
+                  <input type="text" placeholder="XXXX XXXX XXXX XXXX" maxLength={19} required className="w-full bg-white/5 border border-white/10 p-5 rounded-2xl focus:border-accent outline-none font-black text-white transition-all tracking-[0.3em] font-mono placeholder:text-white/10" />
                 </div>
-                <div className="flex gap-4">
+                <div className="flex gap-6">
                   <div className="flex-1">
-                    <label className="text-sm font-bold text-gray-400 uppercase tracking-widest block mb-2">Expiry Date</label>
-                    <input type="text" placeholder="MM/YY" maxLength={5} required className="w-full bg-gray-50 border border-gray-200 p-4 rounded-xl focus:ring-2 focus:ring-accent outline-none font-medium text-navy transition-all" />
+                    <label className="text-[10px] font-black text-gray-500 uppercase tracking-[0.4em] block mb-3">EXPIRY</label>
+                    <input type="text" placeholder="MM / YY" maxLength={5} required className="w-full bg-white/5 border border-white/10 p-5 rounded-2xl focus:border-accent outline-none font-black text-white transition-all text-center tracking-widest placeholder:text-white/10" />
                   </div>
                   <div className="flex-1">
-                    <label className="text-sm font-bold text-gray-400 uppercase tracking-widest block mb-2">Security Code</label>
-                    <input type="password" placeholder="CVV" maxLength={3} required className="w-full bg-gray-50 border border-gray-200 p-4 rounded-xl focus:ring-2 focus:ring-accent outline-none font-medium text-navy transition-all tracking-widest" />
+                    <label className="text-[10px] font-black text-gray-500 uppercase tracking-[0.4em] block mb-3">SECURITY</label>
+                    <input type="password" placeholder="CVV" maxLength={3} required className="w-full bg-white/5 border border-white/10 p-5 rounded-2xl focus:border-accent outline-none font-black text-white transition-all text-center tracking-[0.5em] placeholder:text-white/10" />
                   </div>
                 </div>
               </div>
             )}
 
-            <button type="submit" disabled={processing} className="btn-primary w-full mt-auto py-4 text-lg">
-              {processing ? 'Processing Razorpay Settlement...' : `Pay Securely ₹${(price + BOOKING_FEE).toLocaleString('en-IN')}`}
+            <button type="submit" disabled={processing} className="w-full h-18 bg-white text-navy font-black rounded-2xl mt-auto transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-20 uppercase tracking-[0.2em] text-sm">
+              {processing ? 'SYNCING TRANSACTION...' : `AUTHORIZE ₹${(price + BOOKING_FEE).toLocaleString('en-IN')}`}
             </button>
           </form>
         </div>
 
         {/* ORDER SUMMARY */}
         <div className="lg:col-span-1">
-          <div className="bg-white p-8 rounded-3xl shadow-soft border border-gray-100 flex flex-col gap-6">
-            <h3 className="font-black text-xl border-b border-gray-100 pb-4">Itinerary Invoice</h3>
-            <div className="space-y-3 font-medium">
-              <div className="flex justify-between items-center text-sm"><span className="text-gray-400">Destination</span> <span className="text-navy">{destination}</span></div>
-              <div className="flex justify-between items-center text-sm"><span className="text-gray-400">Operator Code</span> <span className="text-navy">{operatorNo}</span></div>
-              <div className="flex justify-between items-center text-sm"><span className="text-gray-400">Selected Seats</span> <span className="text-navy font-bold">{seat.split(',').join(', ')}</span></div>
+          <div className="acrylic-glass p-8 rounded-[40px] border border-white/5 flex flex-col gap-8 shadow-2xl relative overflow-hidden">
+            <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-accent/5 rounded-full blur-3xl"></div>
+            
+            <h3 className="font-black text-xs uppercase tracking-[0.4em] text-accent border-b border-white/5 pb-6">Payload Summary</h3>
+            
+            <div className="space-y-6">
+              <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
+                <span className="text-gray-500">Destination</span> 
+                <span className="text-white">{destination}</span>
+              </div>
+              <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
+                <span className="text-gray-500">Fleet ID</span> 
+                <span className="text-white">{operatorNo}</span>
+              </div>
+              <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
+                <span className="text-gray-500">Coordinates</span> 
+                <span className="text-accent">{seat.split(',').join(' · ')}</span>
+              </div>
             </div>
-            <div className="p-4 bg-gray-50 rounded-xl space-y-3 border border-gray-100 text-sm font-medium">
-              <div className="flex justify-between"><span className="text-gray-500">Base Operator Fare</span> <span className="text-navy">₹{price.toLocaleString('en-IN')}</span></div>
-              <div className="flex justify-between"><span className="text-gray-500">Platform Convenience Fee</span> <span className="text-navy">₹{BOOKING_FEE}</span></div>
+
+            <div className="p-5 bg-white/5 rounded-2xl space-y-4 border border-white/5 text-[10px] font-black uppercase tracking-widest">
+              <div className="flex justify-between"><span className="text-gray-500">Carrier Fare</span> <span className="text-white">₹{price.toLocaleString('en-IN')}</span></div>
+              <div className="flex justify-between"><span className="text-gray-500">Convenience</span> <span className="text-white">₹{BOOKING_FEE}</span></div>
             </div>
-            <div className="flex justify-between items-center font-black text-2xl border-t border-gray-100 pt-4">
-              <span>Total Price</span>
-              <span className="text-accent">₹{(price + BOOKING_FEE).toLocaleString('en-IN')}</span>
+
+            <div className="flex justify-between items-baseline font-black border-t border-white/5 pt-8">
+              <span className="text-[10px] text-gray-500 uppercase tracking-[0.4em]">TOTAL FEE</span>
+              <span className="text-4xl text-white tracking-tighter">₹{(price + BOOKING_FEE).toLocaleString('en-IN')}</span>
             </div>
           </div>
         </div>

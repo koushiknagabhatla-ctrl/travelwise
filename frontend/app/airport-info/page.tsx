@@ -20,7 +20,8 @@ export default function AirportInfo() {
   useEffect(() => {
     const fetchAirports = async () => {
       try {
-        const res = await axios.get('http://localhost:5002/api/airports');
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002';
+        const res = await axios.get(`${API_URL}/api/airports`);
         if (res.data.success) {
           setAirports(res.data.data);
         }
@@ -34,62 +35,62 @@ export default function AirportInfo() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-32 pb-24 text-navy">
+    <div className="bg-[#020617] min-h-screen pt-32 pb-24 text-white">
       <div className="max-w-7xl mx-auto px-6">
         
-        <div className="text-center mb-16">
-          <span className="inline-block py-1 px-4 rounded-full bg-accent/10 text-accent font-bold text-sm tracking-wider mb-4 border border-accent/20">
-            OPEN FLIGHTS DATABASE 2026
+        <div className="text-center mb-20 animate-fade-up">
+          <span className="inline-block py-2 px-6 rounded-full bg-accent/10 text-accent font-black text-[10px] uppercase tracking-[0.4em] mb-6 border border-accent/20">
+            OpenFlights Global Infrastructure · 2026
           </span>
-          <h1 className="text-4xl md:text-5xl font-black mb-4 tracking-tight">Indian Airport Coverage Directory</h1>
-          <p className="text-gray-500 font-medium max-w-2xl mx-auto text-lg hover:text-navy transition-colors">
-            Comprehensive dataset exposing coordinates, terminal footprints, and live operational stats across our microservice API.
+          <h1 className="text-5xl md:text-6xl font-black mb-6 tracking-tighter">Strategic Gateways Portfolio</h1>
+          <p className="text-gray-500 font-extrabold uppercase tracking-[0.3em] text-xs max-w-3xl mx-auto leading-relaxed">
+            Live metadata exposing coordinate geometry, terminal density, and operational operational footprints across our Indian transit corridors.
           </p>
         </div>
 
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {Array(6).fill(0).map((_, i) => (
-              <div key={i} className="bg-white rounded-2xl h-64 shadow-sm border border-gray-100 animate-pulse" />
+              <div key={i} className="acrylic-glass h-72 rounded-[32px] animate-pulse border border-white/5" />
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {airports.map(apt => (
-              <div key={apt.code} className="bg-white rounded-2xl shadow-soft border border-gray-100 p-6 flex flex-col relative overflow-hidden group hover:shadow-[0_8px_30px_rgba(26,26,46,0.12)] transition-all hover:-translate-y-1">
+              <div key={apt.code} className="acrylic-glass rounded-[40px] border border-white/5 p-8 flex flex-col relative overflow-hidden group hover:border-accent/40 transition-all hover:-translate-y-2 shadow-2xl">
                 
                 {/* Decorative Map BG Simulation */}
-                <div className="absolute top-0 right-0 w-32 h-32 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-50 via-white to-white opacity-40 group-hover:scale-150 transition-transform duration-700 pointer-events-none" />
+                <div className="absolute top-0 right-0 w-48 h-48 bg-accent/5 rounded-full blur-3xl -mr-24 -mt-24 group-hover:scale-150 transition-transform duration-1000 pointer-events-none" />
 
-                <div className="flex justify-between items-start mb-4 relative z-10">
+                <div className="flex justify-between items-start mb-8 relative z-10">
                   <div>
-                    <div className="flex items-center gap-2 text-gray-500 font-semibold text-sm mb-1">
-                      <MapPin size={16} className="text-accent" /> {apt.city}, IN
+                    <div className="flex items-center gap-3 text-accent font-black text-[10px] uppercase tracking-[0.3em] mb-3">
+                      <MapPin size={16} strokeWidth={3} /> {apt.city}, IN
                     </div>
-                    <h3 className="text-xl font-bold leading-tight line-clamp-2">{apt.name}</h3>
+                    <h3 className="text-2xl font-black tracking-tighter leading-tight line-clamp-2">{apt.name}</h3>
                   </div>
-                  <div className="bg-navy text-white px-3 py-1.5 rounded-lg font-black text-sm shadow-sm ring-1 ring-white/10">
+                  <div className="bg-white text-navy px-4 py-2 rounded-2xl font-black text-sm shadow-xl shadow-accent/10">
                     {apt.code}
                   </div>
                 </div>
 
-                <div className="mt-auto space-y-3 relative z-10">
-                  <div className="bg-gray-50 p-3 rounded-lg flex justify-between items-center border border-gray-100">
-                    <span className="text-sm font-semibold text-gray-500 flex items-center gap-2"><Crosshair size={14}/> Geometry</span>
-                    <span className="text-sm font-bold font-mono text-navy">{apt.lat.toFixed(4)}, {apt.lng.toFixed(4)}</span>
+                <div className="mt-auto space-y-4 relative z-10">
+                  <div className="bg-white/5 p-4 rounded-2xl flex justify-between items-center border border-white/5">
+                    <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest flex items-center gap-3"><Crosshair size={16} className="text-accent"/> COORDINATES</span>
+                    <span className="text-xs font-black font-mono text-white tracking-widest">{apt.lat.toFixed(4)}N, {apt.lng.toFixed(4)}E</span>
                   </div>
-                  <div className="bg-gray-50 p-3 rounded-lg flex justify-between items-center border border-gray-100">
-                    <span className="text-sm font-semibold text-gray-500 flex items-center gap-2"><Navigation size={14}/> Active Terminals</span>
-                    <span className="text-sm font-bold text-navy bg-white px-2 py-0.5 rounded shadow-sm border border-gray-200">T{apt.terminals}</span>
+                  <div className="bg-white/5 p-4 rounded-2xl flex justify-between items-center border border-white/5">
+                    <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest flex items-center gap-3"><Navigation size={16} className="text-accent"/> TERMINAL LOAD</span>
+                    <span className="text-xs font-black text-accent bg-accent/10 px-3 py-1 rounded-lg border border-accent/20">OPERATIONAL T{apt.terminals}</span>
                   </div>
                 </div>
 
                 {/* Simulated Google Maps/OpenWeather button action */}
                 <button 
-                  onClick={() => window.location.href = `/tracking?flightId=${apt.code}-CORRIDOR`}
-                  className="mt-4 w-full bg-navy hover:bg-black text-white py-3 rounded-xl font-semibold transition-colors flex items-center justify-center gap-2 text-sm"
+                  onClick={() => window.location.href = `/tracking?flightId=${apt.code}-AIR-CORRIDOR`}
+                  className="mt-8 w-full bg-white text-navy hover:scale-105 active:scale-95 py-5 rounded-2xl font-black transition-all flex items-center justify-center gap-3 text-[10px] uppercase tracking-widest"
                 >
-                  <PlaneTakeoff size={16} className="text-white" /> View Flight Corridors
+                  <PlaneTakeoff size={18} strokeWidth={3} /> Interrogate Flight Corridors
                 </button>
               </div>
             ))}

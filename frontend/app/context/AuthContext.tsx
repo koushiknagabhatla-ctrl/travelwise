@@ -21,7 +21,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 
 // Centralized Microservice API Gateway URL
-const API_URL = 'http://localhost:5002/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -29,49 +29,47 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Check custom HttpOnly session on initial load
   useEffect(() => {
+    let isMounted = true;
     const verifySession = async () => {
       try {
-        // Ping microservice to verify secure cookie
-        const res = await axios.get(`${API_URL}/auth/verify`, { withCredentials: true });
-        if (res.data.success) {
-          // In a real app, /verify would return full user details, 
-          // but for demo speed we spoof the loaded user if cookie is valid.
-          setUser({ id: res.data.uid, name: 'Traveler', email: 'verified@auth.com' });
+        const response = await axios.get(`${API_URL}/api/auth/verify`, { withCredentials: true });
+        if (isMounted && response.data?.user) {
+          setUser(response.data.user);
         }
       } catch (error) {
-        setUser(null);
+        // Silently handle 401/Unauthorized for periodic checks
+        if (isMounted) setUser(null);
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
     verifySession();
+    return () => { isMounted = false; };
   }, []);
 
   const loginWithGoogle = async () => {
     try {
-      // 1. Trigger Firebase Client Popup
-      // const result = await signInWithPopup(auth, googleProvider);
-      // const idToken = await result.user.getIdToken();
+      // 1. Trigger REAL Firebase Client Popup
+      const result = await signInWithPopup(auth, googleProvider);
+      const idToken = await result.user.getIdToken();
       
-      // Since we are running locally without real Firebase keys, we will spoof the ID token
-      // structure and send it to our microservice for Postgres ingestion and JWT sealing.
-      console.log('Using simulated Firebase Google Popup token...');
-      const pseudoIdToken = 'mock-firebase-demo-user-123';
+      console.log('Synchronizing real Google profile to TravelWise Database...');
       
-      // 2. Send Firebase idToken to backend -> Receives secure httpOnly Cookie
-      const response = await axios.post(`${API_URL}/auth/login`, { 
-        idToken: pseudoIdToken,
-        mockName: 'Demo User',
-        mockEmail: 'demo@travelwise.in',
-        mockPhoto: 'https://www.gravatar.com/avatar?d=mp'
+      // 2. Send REAL Google data to backend -> Receives secure httpOnly Cookie
+      const response = await axios.post(`${API_URL}/api/auth/login`, { 
+        idToken: idToken,
+        mockName: result.user.displayName,
+        mockEmail: result.user.email,
+        mockPhoto: result.user.photoURL
       }, { withCredentials: true });
 
       if (response.data.success) {
         setUser(response.data.user);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Google Sign-In Error:', error);
-      alert('Authentication Gateway failed to process Google OAuth request.');
+      const serverDetails = error.response?.data?.error || error.message;
+      alert(`Authentication Gateway failed. Server Trace: ${serverDetails}`);
     }
   };
 
@@ -81,7 +79,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // await firebaseSignOut(auth);
       
       // 2. Destroy Backend Microservice HttpOnly Cookie
-      await axios.post(`${API_URL}/auth/logout`, {}, { withCredentials: true });
+      await axios.post(`${API_URL}/api/auth/logout`, {}, { withCredentials: true });
       setUser(null);
     } catch (error) {
       console.error('Logout failed:', error);
