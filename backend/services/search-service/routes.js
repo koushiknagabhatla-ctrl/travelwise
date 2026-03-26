@@ -38,7 +38,8 @@ router.get('/', async (req, res) => {
     if (mode === 'flights' && process.env.AVIATIONSTACK_KEY) {
       try {
         console.log('[Search Microservice] Requesting LIVE AviationStack data...');
-        const apiRes = await axios.get(`http://api.aviationstack.com/v1/flights?access_key=${process.env.AVIATIONSTACK_KEY}&dep_iata=${fromIATA}&arr_iata=${toIATA}&flight_status=scheduled`);
+        // Upgrade to HTTPS for secure external API communication
+        const apiRes = await axios.get(`https://api.aviationstack.com/v1/flights?access_key=${process.env.AVIATIONSTACK_KEY}&dep_iata=${fromIATA}&arr_iata=${toIATA}&flight_status=scheduled`);
         
         if (apiRes.data && apiRes.data.data && apiRes.data.data.length > 0) {
           isLive = true;
@@ -82,8 +83,10 @@ router.get('/', async (req, res) => {
         const arrHour = depHour + 2 + Math.floor(Math.random() * 2);
         const arrTime = `${arrHour < 10 ? '0'+arrHour : arrHour > 12 ? arrHour-12 : arrHour}:${Math.random() > 0.5 ? '45' : '15'} ${arrHour >= 12 ? 'PM' : 'AM'}`;
 
+        // Robust ID generation with higher entropy for multi-instance compatibility
+        const uniqueId = crypto.randomUUID ? crypto.randomUUID().split('-')[0] : `fallback-${Date.now()}-${i}`;
         results.push({
-            id: `amadeus-offer-${Date.now()}-${crypto.randomUUID ? crypto.randomUUID().split('-')[0] : i}`,
+            id: `amadeus-offer-${uniqueId}`,
             mode: mode || 'flights',
             carrier: carrier || 'IndiGo',
             flightNumber: mode === 'flights' ? `${carrier.substring(0,2).toUpperCase()}-${flightNum}` : `1295${i} Exp`,

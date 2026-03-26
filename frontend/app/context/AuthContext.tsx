@@ -68,15 +68,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     } catch (error: any) {
       console.error('Google Sign-In Error:', error);
-      const serverDetails = error.response?.data?.error || error.message;
-      alert(`Authentication Gateway failed. Server Trace: ${serverDetails}`);
+      // Removed alert for better UX in production-grade apps
     }
   };
 
   const logout = async () => {
     try {
       // 1. Destroy Firebase Local Session
-      // await firebaseSignOut(auth);
+      await firebaseSignOut(auth);
       
       // 2. Destroy Backend Microservice HttpOnly Cookie
       await axios.post(`${API_URL}/api/auth/logout`, {}, { withCredentials: true });

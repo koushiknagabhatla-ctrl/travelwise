@@ -12,7 +12,8 @@ function SeatSelectionContent() {
   const { user } = useAuth();
   
   const mode = searchParams.get('mode') || 'flights';
-  const price = parseInt(searchParams.get('price') || '0', 10);
+  const rawPrice = searchParams.get('price') || '0';
+  const price = isNaN(parseInt(rawPrice, 10)) ? 0 : parseInt(rawPrice, 10);
   const operatorNo = searchParams.get('operatorNo') || '';
   const from = searchParams.get('from') || '';
   const destination = searchParams.get('destination') || '';
