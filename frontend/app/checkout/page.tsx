@@ -2,7 +2,7 @@
 
 import { useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { ShieldCheck, CreditCard, Banknote, Smartphone, CheckCircle2 } from 'lucide-react';
+import { ShieldCheck, CheckCircle2 } from 'lucide-react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 

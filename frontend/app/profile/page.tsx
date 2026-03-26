@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from '../context/AuthContext';
-import { Plane, Calendar, MapPin, Download, CheckCircle2 } from 'lucide-react';
+import { Plane, Download, CheckCircle2 } from 'lucide-react';
 
 export default function ProfileDashboard() {
     const { user, loading } = useAuth();

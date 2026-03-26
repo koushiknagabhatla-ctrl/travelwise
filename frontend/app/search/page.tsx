@@ -3,7 +3,7 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import axios from 'axios';
-import { PlaneTakeoff, Train, Clock, ArrowRight, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { PlaneTakeoff, Train, ArrowRight, ShieldCheck, CheckCircle2 } from 'lucide-react';
 
 interface SeatClass { name: string; price: number; }
 interface TravelResult {

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { Plane, Train, CheckCircle2, Lock, ArrowRight } from 'lucide-react';
+import { Plane, Train, Lock, ArrowRight } from 'lucide-react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 

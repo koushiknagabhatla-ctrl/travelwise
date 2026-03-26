@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { PlaneTakeoff, Train, Search, MapPin, Calendar, Users, Sparkles, ChevronRight, ArrowRight } from 'lucide-react';
-import axios from 'axios';
+import { PlaneTakeoff, Train, Search, MapPin, Calendar, Sparkles, ArrowRight } from 'lucide-react';
 
 const AIRLINES = ['IndiGo', 'Air India', 'Vistara', 'SpiceJet', 'Akasa Air', 'GoFirst', 'Alliance Air', 'Star Air', 'Blue Dart'];
 const TRAINS = ['Indian Railways (IRCTC)'];
