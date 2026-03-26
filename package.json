@@ -1,0 +1,13 @@
+{
+  "name": "travelwise-monorepo",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "install": "npm install",
+    "build": "npm run build --workspace=frontend",
+    "start": "npm run start --workspace=frontend"
+  }
+}

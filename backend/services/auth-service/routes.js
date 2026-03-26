@@ -7,9 +7,10 @@ const prisma = require('../../../lib/prisma');
 const JWT_SECRET = process.env.JWT_SECRET || 'travelwise_v2_super_secret';
 
 // --- Firebase Admin Initialization ---
-if (process.env.FIREBASE_SERVICE_ACCOUNT_KEY) {
+const firebaseKey = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
+if (firebaseKey && firebaseKey.trim() !== "" && firebaseKey !== '""') {
   try {
-    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
+    const serviceAccount = JSON.parse(firebaseKey);
     admin.initializeApp({
       credential: admin.credential.cert(serviceAccount)
     });
@@ -18,7 +19,7 @@ if (process.env.FIREBASE_SERVICE_ACCOUNT_KEY) {
     console.error('[Auth Microservice] Firebase Admin Init Failed:', err.message);
   }
 } else {
-  console.warn('[Auth Microservice] WARNING: FIREBASE_SERVICE_ACCOUNT_KEY missing. Using SIMULATION mode.');
+  console.warn('[Auth Microservice] WARNING: FIREBASE_SERVICE_ACCOUNT_KEY missing or empty. Using SIMULATION mode.');
 }
 
 /**
