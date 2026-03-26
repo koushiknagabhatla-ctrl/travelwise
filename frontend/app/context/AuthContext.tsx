@@ -20,8 +20,8 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 
-// Centralized Microservice API Gateway URL
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002';
+// Centralized Microservice API Gateway
+const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);

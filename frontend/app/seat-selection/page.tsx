@@ -27,7 +27,7 @@ function SeatSelectionContent() {
   useEffect(() => {
     const fetchAvailability = async () => {
       try {
-        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002';
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
         const res = await axios.get(`${API_URL}/api/booking/availability`, {
           params: { operatorNo, date }
         });

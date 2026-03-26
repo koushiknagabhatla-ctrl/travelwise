@@ -20,7 +20,7 @@ function LiveTrackingContent() {
   useEffect(() => {
     const fetchTelemetry = async () => {
       try {
-        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002';
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
         const res = await axios.get(`${API_URL}/api/tracking/live?flightId=IG-305`);
         if (res.data.success) {
           setTelemetry(res.data.telemetry);

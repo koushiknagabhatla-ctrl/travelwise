@@ -31,7 +31,7 @@ function CheckoutContent() {
     
     setProcessing(true);
     try {
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002';
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
       // 1. Hit Payment Microservice (Razorpay Order creation simulation)
       const rzpRes = await axios.post(`${API_URL}/api/payment/create-order`, {
         amount: price + BOOKING_FEE,

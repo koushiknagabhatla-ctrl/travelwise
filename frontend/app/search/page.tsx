@@ -37,7 +37,7 @@ function SearchResultsContent() {
   useEffect(() => {
     const fetchResults = async () => {
       try {
-        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002';
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
         const response = await axios.get(`${API_URL}/api/search`, {
           params: { mode, carrier, from, to, date, pax },
           withCredentials: true

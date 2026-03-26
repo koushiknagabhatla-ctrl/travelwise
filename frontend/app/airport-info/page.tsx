@@ -20,7 +20,7 @@ export default function AirportInfo() {
   useEffect(() => {
     const fetchAirports = async () => {
       try {
-        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002';
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
         const res = await axios.get(`${API_URL}/api/airports`);
         if (res.data.success) {
           setAirports(res.data.data);
