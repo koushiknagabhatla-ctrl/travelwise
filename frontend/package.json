@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "next dev",
-    "dev:all": "concurrently --names \"FRONTEND,BACKEND\" --prefix-colors \"cyan,magenta\" \"next dev\" \"node ../travel-backend/server.js\"",
+    "dev:all": "concurrently --names \"FRONTEND,BACKEND\" --prefix-colors \"cyan,magenta\" \"next dev\" \"node ../backend/server.js\"",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"
@@ -24,7 +24,8 @@
     "next": "15.2.0",
     "react": "19.0.0",
     "react-dom": "19.0.0",
-    "react-leaflet": "^5.0.0"
+    "react-leaflet": "^5.0.0",
+    "socket.io-client": "^4.8.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

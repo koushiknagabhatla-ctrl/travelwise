@@ -9,7 +9,55 @@ const compression = require('compression');
 require('dotenv').config();
 
 const app = express();
+const http = require('http');
+const server = http.createServer(app);
+const { Server } = require('socket.io');
+
 const PORT = process.env.PORT || 5002;
+
+// --- 3. Winston Logger Implementation ---
+const logger = winston.createLogger({
+  level: 'info',
+  format: winston.format.json(),
+  transports: [
+    new winston.transports.Console({ format: winston.format.simple() })
+  ]
+});
+
+// --- 0. Socket.io Initialization ---
+const io = new Server(server, {
+  cors: {
+    origin: process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(',') : ['http://localhost:3000', 'http://127.0.0.1:3000'],
+    methods: ["GET", "POST"]
+  }
+});
+
+io.on('connection', (socket) => {
+  logger.info(`[SOCKET] User connected: ${socket.id}`);
+  
+  socket.on('disconnect', () => {
+    logger.info(`[SOCKET] User disconnected: ${socket.id}`);
+  });
+});
+
+// Periodic Telemetry Simulation (Every 5 seconds)
+setInterval(() => {
+  const timeFactor = Math.abs(Math.sin(Date.now() / 100000));
+  const currentLat = 19.0896 + (timeFactor * (28.5562 - 19.0896));
+  const currentLng = 72.8656 + (timeFactor * (77.1000 - 72.8656));
+
+  const telemetry = {
+    flightStr: 'IG-305',
+    velocity: Math.floor(850 + (Math.random() * 50)),
+    altitude: Math.floor(35000 + (Math.random() * 2000)),
+    heading: 42.5,
+    coordinates: [currentLng, currentLat],
+    eta: '45 mins',
+    lastContact: new Date().toISOString()
+  };
+
+  io.emit('telemetryUpdate', telemetry);
+}, 5000);
 
 // --- 1. Security & Middleware ---
 app.use(helmet({
@@ -29,15 +77,6 @@ const globalLimiter = rateLimit({
   message: { error: 'Too many requests, please try again later.' }
 });
 app.use('/api/', globalLimiter);
-
-// --- 3. Winston Logger Implementation ---
-const logger = winston.createLogger({
-  level: 'info',
-  format: winston.format.json(),
-  transports: [
-    new winston.transports.Console({ format: winston.format.simple() })
-  ]
-});
 
 // --- 4. Microservices Routing Dashboard ---
 // (We mount each isolated service to the main Gateway router here)
@@ -76,7 +115,7 @@ app.use((err, req, res, next) => {
 });
 
 // --- 7. Server Initialization ---
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   logger.info(`Enterprise Microservices Gateway running natively on http://localhost:${PORT}`);
   console.log('\n---------------------------------------------------------');
   console.log('💎 [SYSTEM] TRAVELWISE GATEWAY v2.1 (STABLE) - READY FOR TRAFFIC');

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, Suspense } from 'react';
-import axios from 'axios';
+import { io } from 'socket.io-client';
 import { Plane, Navigation, Zap, Clock } from 'lucide-react';
 
 interface Telemetry {
@@ -18,23 +18,30 @@ function LiveTrackingContent() {
   const [pulse, setPulse] = useState(false);
 
   useEffect(() => {
-    const fetchTelemetry = async () => {
-      try {
-        const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
-        const res = await axios.get(`${API_URL}/api/tracking/live?flightId=IG-305`);
-        if (res.data.success) {
-          setTelemetry(res.data.telemetry);
-          setPulse(true);
-          setTimeout(() => setPulse(false), 1000);
-        }
-      } catch (error) {
-        console.error('Tracking Interrupted');
-      }
-    };
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002';
+    const socket = io(API_URL, {
+      transports: ['websocket'], // Force WebSocket for better real-time performance
+    });
 
-    fetchTelemetry();
-    const interval = setInterval(fetchTelemetry, 30000); // Poll every 30s strictly mapped to requirements
-    return () => clearInterval(interval);
+    socket.on('connect', () => {
+      console.log('📡 Connected to Satellite Core');
+    });
+
+    socket.on('telemetryUpdate', (data: Telemetry) => {
+      setTelemetry(data);
+      setPulse(true);
+      // Faster pulse reset for more responsive feeling
+      const timer = setTimeout(() => setPulse(false), 600);
+      return () => clearTimeout(timer);
+    });
+
+    socket.on('connect_error', (err: { message: string }) => {
+      console.error('🛰 Satellite Link Interrupted:', err.message);
+    });
+
+    return () => {
+      socket.disconnect();
+    };
   }, []);
 
   return (
