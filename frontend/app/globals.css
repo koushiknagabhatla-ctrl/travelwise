@@ -5,46 +5,78 @@
 @theme {
   --color-navy: #020617;
   --color-navy-light: #0F172A;
-  --color-accent: #00D2FF; 
+  --color-accent: #00D2FF;
   --color-accent-hover: #34E0FF;
-  
+
   --font-manrope: "Manrope", sans-serif;
   --font-poppins: "Poppins", sans-serif;
-  
-  --shadow-soft: 0 20px 50px rgba(0, 0, 0, 0.6);
-  --shadow-accent: 0 0 30px rgba(0, 210, 255, 0.3);
 }
 
-@layer base {
-  html, body {
-    background-color: #020617 !important;
-    color: #FFFFFF;
-    font-family: var(--font-poppins);
-    margin: 0;
-    padding: 0;
-    min-height: 100vh;
-  }
-
-  h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-manrope);
-    letter-spacing: -0.02em;
-  }
+html, body {
+  background-color: #020617 !important;
+  color: #FFFFFF;
+  font-family: var(--font-poppins);
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
 }
 
-@layer components {
-  .acrylic-glass {
-    @apply bg-slate-900/80 backdrop-blur-2xl border border-white/10 shadow-soft transition-all duration-300;
-  }
-  
-  .glass-dropdown {
-    @apply bg-slate-900/95 backdrop-blur-3xl border border-white/10 shadow-2xl;
-  }
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-manrope);
+  letter-spacing: -0.02em;
+}
 
-  .btn-glass {
-    @apply bg-white/10 backdrop-blur-md text-white font-bold py-4 px-10 rounded-2xl border border-white/10 shadow-soft hover:bg-white/20 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-3;
-  }
+.acrylic-glass {
+  background-color: rgb(15 23 42 / 0.8);
+  backdrop-filter: blur(48px);
+  border: 1px solid rgb(255 255 255 / 0.1);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+  transition: all 0.3s;
+}
 
-  .date-card {
-    @apply p-4 rounded-2xl border border-white/5 bg-white/5 hover:bg-accent/10 hover:border-accent transition-all cursor-pointer text-center;
-  }
+.glass-dropdown {
+  background-color: rgb(15 23 42 / 0.95);
+  backdrop-filter: blur(64px);
+  border: 1px solid rgb(255 255 255 / 0.1);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.btn-glass {
+  background-color: rgb(255 255 255 / 0.1);
+  backdrop-filter: blur(12px);
+  color: white;
+  font-weight: 700;
+  padding: 1rem 2.5rem;
+  border-radius: 1rem;
+  border: 1px solid rgb(255 255 255 / 0.1);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.btn-glass:hover {
+  background-color: rgb(255 255 255 / 0.2);
+  transform: scale(1.02);
+}
+
+.btn-glass:active {
+  transform: scale(0.98);
+}
+
+.date-card {
+  padding: 1rem;
+  border-radius: 1rem;
+  border: 1px solid rgb(255 255 255 / 0.05);
+  background-color: rgb(255 255 255 / 0.05);
+  transition: all 0.3s;
+  cursor: pointer;
+  text-align: center;
+}
+
+.date-card:hover {
+  background-color: rgb(0 210 255 / 0.1);
+  border-color: #00D2FF;
 }
