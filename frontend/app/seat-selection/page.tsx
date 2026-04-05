@@ -32,7 +32,7 @@ function SeatSelectionContent() {
           params: { operatorNo, date }
         });
         if (res.data.success) setBookedSeats(res.data.bookedSeats);
-      } catch (e) {
+      } catch (_e) {
         console.error("Failed to fetch availability");
       }
     };
@@ -41,8 +41,6 @@ function SeatSelectionContent() {
 
   // Generate 6 rows for airplanes, or specific berths for trains
   const rows = [1, 2, 3, 4, 5, 6];
-  const flightCols = ['A', 'B', 'C', 'D', 'E', 'F'];
-  const trainCols = ['L', 'M', 'U', 'SL', 'SU'];
 
   const toggleSeat = (seat: string) => {
     setError('');
@@ -69,8 +67,9 @@ function SeatSelectionContent() {
         const finalPrice = price * selectedSeats.length;
         router.push(`/checkout?mode=${mode}&operatorNo=${operatorNo}&from=${from}&destination=${destination}&price=${finalPrice}&seat=${selectedSeats.join(',')}&date=${date}`);
       }
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to lock seats in Redis.');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to lock seats in Redis.';
+      setError((err as { response?: { data?: { error?: string } } })?.response?.data?.error || message);
     } finally {
       setLocking(false);
     }

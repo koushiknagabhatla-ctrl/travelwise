@@ -54,7 +54,7 @@ function CheckoutContent() {
         // 3. Show Success Page
         setTimeout(() => { setSuccess(true); setProcessing(false); }, 1500);
       }
-    } catch (err) {
+    } catch (_err) {
       alert("Microservice Gateway timed out handling the secure payload.");
       setProcessing(false);
     }
@@ -159,7 +159,7 @@ function CheckoutContent() {
               </div>
             )}
 
-            <button type="submit" disabled={processing} className="w-full h-18 bg-white text-navy font-black rounded-2xl mt-auto transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-20 uppercase tracking-[0.2em] text-sm">
+            <button type="submit" disabled={processing} className="w-full h-[72px] bg-white text-navy font-black rounded-2xl mt-auto transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-20 uppercase tracking-[0.2em] text-sm">
               {processing ? 'SYNCING TRANSACTION...' : `AUTHORIZE ₹${(price + BOOKING_FEE).toLocaleString('en-IN')}`}
             </button>
           </form>

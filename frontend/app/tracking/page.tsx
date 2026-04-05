@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, useState, useRef, Suspense } from 'react';
 import { io } from 'socket.io-client';
 import { Plane, Navigation, Zap, Clock } from 'lucide-react';
 
@@ -17,6 +17,8 @@ function LiveTrackingContent() {
   const [telemetry, setTelemetry] = useState<Telemetry | null>(null);
   const [pulse, setPulse] = useState(false);
 
+  const pulseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   useEffect(() => {
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002';
     const socket = io(API_URL, {
@@ -30,9 +32,9 @@ function LiveTrackingContent() {
     socket.on('telemetryUpdate', (data: Telemetry) => {
       setTelemetry(data);
       setPulse(true);
-      // Faster pulse reset for more responsive feeling
-      const timer = setTimeout(() => setPulse(false), 600);
-      return () => clearTimeout(timer);
+      // Clear any existing timer before creating a new one
+      if (pulseTimerRef.current) clearTimeout(pulseTimerRef.current);
+      pulseTimerRef.current = setTimeout(() => setPulse(false), 600);
     });
 
     socket.on('connect_error', (err: { message: string }) => {
@@ -40,6 +42,7 @@ function LiveTrackingContent() {
     });
 
     return () => {
+      if (pulseTimerRef.current) clearTimeout(pulseTimerRef.current);
       socket.disconnect();
     };
   }, []);
@@ -101,7 +104,7 @@ function LiveTrackingContent() {
                  <m.icon size={24} className={`mx-auto mb-4 transition-transform group-hover:scale-110 ${m.premium ? 'text-accent' : 'text-gray-500'}`} />
                  <div className="text-gray-600 text-[10px] font-black uppercase tracking-[0.4em] mb-2">{m.label}</div>
                  <div className={`text-3xl font-black tracking-tighter ${m.premium ? 'text-accent' : 'text-white'}`}>
-                   {m.value} {m.unit && <span className="text-xs font-extra-bold opacity-30 ml-1">{m.unit}</span>}
+                   {m.value} {m.unit && <span className="text-xs font-extrabold opacity-30 ml-1">{m.unit}</span>}
                  </div>
                </div>
              ))}

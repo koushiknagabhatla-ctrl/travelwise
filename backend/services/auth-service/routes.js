@@ -99,13 +99,26 @@ router.post('/logout', (req, res) => {
  * PATH: /api/auth/verify
  * DESCRIPTION: Middleware target to confirm a session's validity for cross-microservice communication.
  */
-router.get('/verify', (req, res) => {
+router.get('/verify', async (req, res) => {
   const token = req.cookies?.auth_session;
   if (!token) return res.status(401).json({ error: 'No active session token' });
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-    res.json({ success: true, uid: decoded.userId });
+
+    // Look up full user profile so AuthContext can set the user state correctly
+    let user = null;
+    try {
+      user = await prisma.user.findUnique({ where: { id: decoded.userId } });
+    } catch (dbErr) {
+      // If Prisma is unavailable, return a minimal user object from the JWT payload
+      console.warn('[Auth Microservice] Prisma lookup failed during verify, using JWT payload:', dbErr.message);
+      user = { id: decoded.userId, email: decoded.email, name: decoded.email, profilePhoto: null };
+    }
+
+    if (!user) return res.status(401).json({ error: 'User not found' });
+
+    res.json({ success: true, user });
   } catch (error) {
     res.status(401).json({ error: 'Session Expired' });
   }
