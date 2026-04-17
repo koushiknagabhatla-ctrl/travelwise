@@ -32,11 +32,11 @@ const DESTINATIONS = [
   { city: "Goa", tagline: "Sun, Sand & Serenity", price: "₹2,499", image: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=800&q=80" },
   { city: "Jaipur", tagline: "The Pink City of Rajasthan", price: "₹2,199", image: "https://images.unsplash.com/photo-1477587458883-47145ed94245?w=800&q=80" },
   { city: "Kerala", tagline: "God's Own Country", price: "₹3,299", image: "https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?w=800&q=80" },
-  { city: "Udaipur", tagline: "City of Lakes", price: "₹2,899", image: "https://images.unsplash.com/photo-1590418375631-f18bace707f7?w=800&q=80" },
+  { city: "Udaipur", tagline: "City of Lakes", price: "₹2,899", image: "/images/udaipur.png" },
   { city: "Varanasi", tagline: "Spiritual Heart of India", price: "₹2,599", image: "https://images.unsplash.com/photo-1561361513-2d000a50f0dc?w=800&q=80" },
   { city: "Andaman", tagline: "Tropical Island Paradise", price: "₹5,499", image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80" },
   { city: "Manali", tagline: "Gateway to the Himalayas", price: "₹3,799", image: "https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?w=800&q=80" },
-  { city: "Leh Ladakh", tagline: "Land of High Passes", price: "₹4,999", image: "https://images.unsplash.com/photo-1559868840-7f28ed5cf0b0?w=800&q=80" },
+  { city: "Leh Ladakh", tagline: "Land of High Passes", price: "₹4,999", image: "/images/leh.png" },
 ];
 
 const AIRLINES = [
@@ -181,14 +181,21 @@ function DatePickerInput({ value, onChange }: { value: string; onChange: (val: s
   // Prevent going behind current actual month
   const isPrevDisabled = currentMonth.getFullYear() === today.getFullYear() && currentMonth.getMonth() === today.getMonth();
 
+  const formatDisplayDate = (val: string) => {
+    if (!val) return <span className="text-gray-400">Select Date</span>;
+    const parts = val.split('-');
+    if (parts.length !== 3) return val;
+    return `${parseInt(parts[2])} ${monthNames[parseInt(parts[1])-1]} ${parts[0]}`;
+  };
+
   return (
-    <div className="relative w-full" ref={wrapperRef}>
+    <div className="relative w-full z-50" ref={wrapperRef}>
       <Calendar className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted" />
       <div 
         onClick={() => setOpen(!open)}
         className="input-field pl-11 h-13 text-base flex items-center cursor-pointer select-none bg-white font-medium"
       >
-        {value ? new Date(value).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric'}) : <span className="text-gray-400">Select Date</span>}
+        {formatDisplayDate(value)}
       </div>
 
       <AnimatePresence>
