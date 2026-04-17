@@ -12,7 +12,7 @@ import {
   Users, Star, Wind, Droplets
 } from "lucide-react";
 
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5002";
+const API = process.env.NEXT_PUBLIC_API_URL || "";
 
 interface FlightResult {
   id: string;

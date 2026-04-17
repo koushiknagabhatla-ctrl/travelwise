@@ -9,7 +9,7 @@ import NavHeader from "../components/ui/nav-header";
 import { Card } from "../components/ui/glass-card";
 import { useAuth } from "../context/AuthContext";
 
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5002";
+const API = process.env.NEXT_PUBLIC_API_URL || "";
 const BOOKING_FEE = 299;
 
 function CheckoutContent() {

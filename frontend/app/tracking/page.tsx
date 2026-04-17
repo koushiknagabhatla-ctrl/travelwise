@@ -7,7 +7,7 @@ import NavHeader from "../components/ui/nav-header";
 import { Card } from "../components/ui/glass-card";
 import { Plane, Search, Clock, AlertTriangle, CheckCircle2, ArrowRight, Radio } from "lucide-react";
 
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5002";
+const API = process.env.NEXT_PUBLIC_API_URL || "";
 
 export default function TrackingPage() {
   const [flightNumber, setFlightNumber] = useState("");

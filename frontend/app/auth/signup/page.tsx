@@ -7,7 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import { Plane, Mail, Lock, Eye, EyeClosed, ArrowRight, Shield, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 
-export default function AuthPage() {
+export default function SignupPage() {
   const router = useRouter();
   const { loginWithGoogle, user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -159,7 +159,7 @@ export default function AuthPage() {
                   transition={{ delay: 0.2 }}
                   className="text-2xl font-bold text-white"
                 >
-                  Welcome Back
+                  Create an Account
                 </motion.h1>
                 <motion.p
                   initial={{ opacity: 0 }}
@@ -167,12 +167,25 @@ export default function AuthPage() {
                   transition={{ delay: 0.3 }}
                   className="text-white/50 text-sm"
                 >
-                  Sign in to continue to TravelWise
+                  Sign up to unlock real-time flight data
                 </motion.p>
               </div>
 
               {/* Form */}
               <form onSubmit={handleSubmit} className="space-y-4">
+                {/* Name */}
+                <div className="relative">
+                  <div className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors ${focusedInput === "name" ? "text-white" : "text-white/40"} border-2 border-current rounded-full opacity-70`} />
+                  <input
+                    type="text"
+                    placeholder="Full name"
+                    onFocus={() => setFocusedInput("name")}
+                    onBlur={() => setFocusedInput(null)}
+                    className="w-full bg-white/[0.06] border border-white/10 focus:border-[#FF8533]/50 rounded-lg h-11 pl-10 pr-3 text-white placeholder:text-white/30 text-sm outline-none transition-all focus:bg-white/[0.1] focus:ring-1 focus:ring-[#FF8533]/30"
+                    required
+                  />
+                </div>
+
                 {/* Email */}
                 <div className="relative">
                   <Mail className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors ${focusedInput === "email" ? "text-white" : "text-white/40"}`} />
@@ -184,6 +197,7 @@ export default function AuthPage() {
                     onFocus={() => setFocusedInput("email")}
                     onBlur={() => setFocusedInput(null)}
                     className="w-full bg-white/[0.06] border border-white/10 focus:border-[#FF8533]/50 rounded-lg h-11 pl-10 pr-3 text-white placeholder:text-white/30 text-sm outline-none transition-all focus:bg-white/[0.1] focus:ring-1 focus:ring-[#FF8533]/30"
+                    required
                   />
                 </div>
 
@@ -228,7 +242,7 @@ export default function AuthPage() {
                   </Link>
                 </div>
 
-                {/* Sign in button */}
+                {/* Sign up button */}
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
@@ -243,7 +257,7 @@ export default function AuthPage() {
                       </motion.div>
                     ) : (
                       <motion.span key="text" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex items-center gap-1.5 text-sm">
-                        Sign In <ArrowRight className="w-4 h-4" />
+                        Create Account <ArrowRight className="w-4 h-4" />
                       </motion.span>
                     )}
                   </AnimatePresence>
@@ -274,10 +288,11 @@ export default function AuthPage() {
                   <span className="text-sm">Continue with Google</span>
                 </motion.button>
 
+                {/* Sign up link */}
                 <p className="text-center text-xs text-white/50 mt-3">
-                  Don&apos;t have an account?{" "}
-                  <Link href="/auth/signup" className="text-[#FF8533] font-medium hover:text-[#FF6B00] transition-colors">
-                    Sign up
+                  Already have an account?{" "}
+                  <Link href="/auth" className="text-[#FF8533] font-medium hover:text-[#FF6B00] transition-colors">
+                    Sign in
                   </Link>
                 </p>
               </form>

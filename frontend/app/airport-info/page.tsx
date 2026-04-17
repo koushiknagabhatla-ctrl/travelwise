@@ -8,7 +8,7 @@ import { Card } from "../components/ui/glass-card";
 import { MapPin, Cloud, Plane, Search, Globe, Wind, Droplets, Thermometer } from "lucide-react";
 import { INDIAN_AIRPORTS } from "../../lib/airports";
 
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5002";
+const API = process.env.NEXT_PUBLIC_API_URL || "";
 
 interface Airport {
   code: string;

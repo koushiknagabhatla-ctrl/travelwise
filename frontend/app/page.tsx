@@ -29,14 +29,14 @@ import { INDIAN_AIRPORTS } from "../lib/airports";
 
 // ─── POPULAR DESTINATIONS DATA ───
 const DESTINATIONS = [
-  { city: "Goa", tagline: "Sun, Sand & Serenity", price: "₹2,499", image: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=600&q=80" },
-  { city: "Jaipur", tagline: "The Pink City of Rajasthan", price: "₹2,199", image: "https://images.unsplash.com/photo-1477587458883-47145ed94245?w=600&q=80" },
-  { city: "Kerala", tagline: "God's Own Country", price: "₹3,299", image: "https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?w=600&q=80" },
-  { city: "Udaipur", tagline: "City of Lakes", price: "₹2,899", image: "https://images.unsplash.com/photo-1602517536234-fd8ffb4e62db?w=600&q=80" },
-  { city: "Varanasi", tagline: "Spiritual Heart of India", price: "₹2,599", image: "https://images.unsplash.com/photo-1561361513-2d000a50f0dc?w=600&q=80" },
-  { city: "Andaman", tagline: "Tropical Island Paradise", price: "₹5,499", image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&q=80" },
-  { city: "Manali", tagline: "Gateway to the Himalayas", price: "₹3,799", image: "https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?w=600&q=80" },
-  { city: "Leh Ladakh", tagline: "Land of High Passes", price: "₹4,999", image: "https://images.unsplash.com/photo-1626015365107-aa46d38b3684?w=600&q=80" },
+  { city: "Goa", tagline: "Sun, Sand & Serenity", price: "₹2,499", image: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=800&q=80" },
+  { city: "Jaipur", tagline: "The Pink City of Rajasthan", price: "₹2,199", image: "https://images.unsplash.com/photo-1477587458883-47145ed94245?w=800&q=80" },
+  { city: "Kerala", tagline: "God's Own Country", price: "₹3,299", image: "https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?w=800&q=80" },
+  { city: "Udaipur", tagline: "City of Lakes", price: "₹2,899", image: "https://images.unsplash.com/photo-1590418375631-f18bace707f7?w=800&q=80" },
+  { city: "Varanasi", tagline: "Spiritual Heart of India", price: "₹2,599", image: "https://images.unsplash.com/photo-1561361513-2d000a50f0dc?w=800&q=80" },
+  { city: "Andaman", tagline: "Tropical Island Paradise", price: "₹5,499", image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80" },
+  { city: "Manali", tagline: "Gateway to the Himalayas", price: "₹3,799", image: "https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?w=800&q=80" },
+  { city: "Leh Ladakh", tagline: "Land of High Passes", price: "₹4,999", image: "https://images.unsplash.com/photo-1559868840-7f28ed5cf0b0?w=800&q=80" },
 ];
 
 const AIRLINES = [
@@ -143,6 +143,139 @@ function AutocompleteInput({
   );
 }
 
+// ─── DUAL MONTH CALENDAR PICKER ───
+function DatePickerInput({ value, onChange }: { value: string; onChange: (val: string) => void }) {
+  const [open, setOpen] = useState(false);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Simple current month tracking
+  const today = new Date();
+  const [currentMonth, setCurrentMonth] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
+
+  const generateDays = (year: number, month: number) => {
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const firstDay = new Date(year, month, 1).getDay();
+    const days = [];
+    for (let i = 0; i < firstDay; i++) days.push(null);
+    for (let i = 1; i <= daysInMonth; i++) days.push(i);
+    return days;
+  };
+
+  const nextMonthDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1);
+  const m1Days = generateDays(currentMonth.getFullYear(), currentMonth.getMonth());
+  const m2Days = generateDays(nextMonthDate.getFullYear(), nextMonthDate.getMonth());
+  
+  const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  const dayNames = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
+
+  return (
+    <div className="relative w-full" ref={wrapperRef}>
+      <Calendar className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted" />
+      <div 
+        onClick={() => setOpen(!open)}
+        className="input-field pl-11 h-13 text-base flex items-center cursor-pointer select-none bg-white font-medium"
+      >
+        {value ? new Date(value).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric'}) : <span className="text-gray-400">Select Date</span>}
+      </div>
+
+      <AnimatePresence>
+        {open && (
+           <motion.div
+             initial={{ opacity: 0, y: 10, scale: 0.98 }}
+             animate={{ opacity: 1, y: 0, scale: 1 }}
+             exit={{ opacity: 0, y: 5 }}
+             className="absolute top-full mt-2 left-0 md:left-auto md:right-0 z-50 bg-white p-6 rounded-2xl shadow-[0_20px_50px_-12px_rgba(0,0,0,0.15)] border border-border w-[320px] md:w-[680px]"
+           >
+             <div className="flex justify-between items-center mb-6">
+                <button type="button" onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1))} className="p-2 hover:bg-gray-100 rounded-full transition-colors flex items-center justify-center">
+                  <ChevronRight className="w-5 h-5 rotate-180" />
+                </button>
+                <div className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Select Departure</div>
+                <button type="button" onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1))} className="p-2 hover:bg-gray-100 rounded-full transition-colors flex items-center justify-center">
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+             </div>
+
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+               {/* Month 1 */}
+               <div>
+                  <div className="text-center font-semibold text-text-primary mb-4 text-lg">
+                    {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
+                  </div>
+                  <div className="grid grid-cols-7 gap-1 text-center text-xs font-bold text-text-secondary mb-2">
+                    {dayNames.map(d => <div key={d}>{d}</div>)}
+                  </div>
+                  <div className="grid grid-cols-7 gap-1 text-sm">
+                    {m1Days.map((d, i) => {
+                      if (!d) return <div key={i} className="h-10 w-10"></div>;
+                      const cDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), d);
+                      const isPast = cDate < new Date(new Date().setHours(0,0,0,0));
+                      const isSelected = value === cDate.toISOString().split('T')[0];
+                      return (
+                        <button
+                          key={i}
+                          type="button"
+                          disabled={isPast}
+                          onClick={() => {
+                            onChange(cDate.toISOString().split('T')[0]);
+                            setOpen(false);
+                          }}
+                          className={`h-10 w-10 flex items-center justify-center rounded-lg font-medium transition-all ${isPast ? 'text-gray-300 cursor-not-allowed' : isSelected ? 'bg-primary text-white shadow-md scale-105' : 'hover:bg-primary-50 hover:text-primary text-text-primary'}`}
+                        >
+                          {d}
+                        </button>
+                      );
+                    })}
+                  </div>
+               </div>
+               
+               {/* Month 2 */}
+               <div className="hidden md:block">
+                  <div className="text-center font-semibold text-text-primary mb-4 text-lg">
+                    {monthNames[nextMonthDate.getMonth()]} {nextMonthDate.getFullYear()}
+                  </div>
+                  <div className="grid grid-cols-7 gap-1 text-center text-xs font-bold text-text-secondary mb-2">
+                    {dayNames.map(d => <div key={d}>{d}</div>)}
+                  </div>
+                  <div className="grid grid-cols-7 gap-1 text-sm">
+                    {m2Days.map((d, i) => {
+                      if (!d) return <div key={i} className="h-10 w-10"></div>;
+                      const cDate = new Date(nextMonthDate.getFullYear(), nextMonthDate.getMonth(), d);
+                      const isSelected = value === cDate.toISOString().split('T')[0];
+                      return (
+                        <button
+                          key={i}
+                          type="button"
+                          onClick={() => {
+                            onChange(cDate.toISOString().split('T')[0]);
+                            setOpen(false);
+                          }}
+                          className={`h-10 w-10 flex items-center justify-center rounded-lg font-medium transition-all ${isSelected ? 'bg-primary text-white shadow-md scale-105' : 'hover:bg-primary-50 hover:text-primary text-text-primary'}`}
+                        >
+                          {d}
+                        </button>
+                      );
+                    })}
+                  </div>
+               </div>
+             </div>
+           </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 // ─── FLIGHT SEARCH WIDGET ───
 function FlightSearchWidget() {
   const router = useRouter();
@@ -183,16 +316,7 @@ function FlightSearchWidget() {
             icon={MapPin}
           />
 
-          <div className="relative">
-            <Calendar className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted" />
-            <input
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              className="input-field pl-11 h-13"
-              required
-            />
-          </div>
+          <DatePickerInput value={date} onChange={setDate} />
 
           <div className="relative">
             <Users className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted" />
