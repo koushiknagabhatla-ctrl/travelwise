@@ -42,9 +42,18 @@ def search_flights(
     Real-Time Flight Search via Duffel API.
     Provides highly realistic fallback if API key is missing or invalid.
     """
+    # Fix IATA codes if formatted as "City (XXX)"
+    def extract_iata(iata_str: str) -> str:
+        if "(" in iata_str and ")" in iata_str:
+            return iata_str.split("(")[-1].split(")")[0].strip()
+        return iata_str[:3].upper()
+
+    clean_from = extract_iata(from_iata)
+    clean_to = extract_iata(to_iata)
+    
     if DUFFEL_API_KEY:
         try:
-            slices = [{"origin": from_iata, "destination": to_iata, "departure_date": date}]
+            slices = [{"origin": clean_from, "destination": clean_to, "departure_date": date}]
             passengers = [{"type": "adult"} for _ in range(pax)]
             
             payload = {

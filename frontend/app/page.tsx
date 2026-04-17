@@ -178,6 +178,9 @@ function DatePickerInput({ value, onChange }: { value: string; onChange: (val: s
   const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
   const dayNames = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 
+  // Prevent going behind current actual month
+  const isPrevDisabled = currentMonth.getFullYear() === today.getFullYear() && currentMonth.getMonth() === today.getMonth();
+
   return (
     <div className="relative w-full" ref={wrapperRef}>
       <Calendar className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted" />
@@ -197,7 +200,12 @@ function DatePickerInput({ value, onChange }: { value: string; onChange: (val: s
              className="absolute top-full mt-2 left-0 md:left-auto md:right-0 z-50 bg-white p-6 rounded-2xl shadow-[0_20px_50px_-12px_rgba(0,0,0,0.15)] border border-border w-[320px] md:w-[680px]"
            >
              <div className="flex justify-between items-center mb-6">
-                <button type="button" onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1))} className="p-2 hover:bg-gray-100 rounded-full transition-colors flex items-center justify-center">
+                <button 
+                  type="button" 
+                  disabled={isPrevDisabled}
+                  onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1))} 
+                  className={`p-2 rounded-full transition-colors flex items-center justify-center ${isPrevDisabled ? 'opacity-30 cursor-not-allowed' : 'hover:bg-gray-100'}`}
+                >
                   <ChevronRight className="w-5 h-5 rotate-180" />
                 </button>
                 <div className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Select Departure</div>
