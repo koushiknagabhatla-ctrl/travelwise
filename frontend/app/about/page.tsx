@@ -127,7 +127,7 @@ export default function AboutPage() {
           >
             <div className="rounded-2xl overflow-hidden shadow-xl">
               <img
-                src="https://images.unsplash.com/photo-1436491865332-7a61a109db05?w=800&q=80"
+                src="/about-wing.png"
                 alt="Airplane wing view at sunset"
                 className="w-full h-[400px] object-cover"
               />

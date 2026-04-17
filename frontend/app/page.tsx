@@ -25,6 +25,8 @@ import {
   CheckCircle2,
 } from "lucide-react";
 
+import { INDIAN_AIRPORTS } from "../lib/airports";
+
 // ─── POPULAR DESTINATIONS DATA ───
 const DESTINATIONS = [
   { city: "Goa", tagline: "Sun, Sand & Serenity", price: "₹2,499", image: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=600&q=80" },
@@ -75,8 +77,7 @@ function AutocompleteInput({
         a.city.toLowerCase().includes(search.toLowerCase()) ||
         a.name.toLowerCase().includes(search.toLowerCase()) ||
         a.code.toLowerCase().includes(search.toLowerCase())
-    )
-    .slice(0, 8);
+    );
 
   return (
     <div className="relative w-full" ref={wrapperRef}>
@@ -149,17 +150,10 @@ function FlightSearchWidget() {
   const [to, setTo] = useState("");
   const [date, setDate] = useState("");
   const [pax, setPax] = useState("1");
-  const [airports, setAirports] = useState<any[]>([]);
+  const [airports, setAirports] = useState<any[]>(INDIAN_AIRPORTS);
 
   useEffect(() => {
-    fetch(
-      `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5002"}/api/airports`
-    )
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success && data.data) setAirports(data.data);
-      })
-      .catch((e) => console.error("Could not fetch airports", e));
+    setAirports(INDIAN_AIRPORTS);
   }, []);
 
   const handleSearch = (e: React.FormEvent) => {

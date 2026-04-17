@@ -6,6 +6,7 @@ import axios from "axios";
 import NavHeader from "../components/ui/nav-header";
 import { Card } from "../components/ui/glass-card";
 import { MapPin, Cloud, Plane, Search, Globe, Wind, Droplets, Thermometer } from "lucide-react";
+import { INDIAN_AIRPORTS } from "../../lib/airports";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5002";
 
@@ -21,24 +22,14 @@ interface Airport {
 }
 
 export default function AirportInfoPage() {
-  const [airports, setAirports] = useState<Airport[]>([]);
+  const [airports, setAirports] = useState<Airport[]>(INDIAN_AIRPORTS as Airport[]);
   const [search, setSearch] = useState("");
   const [selectedAirport, setSelectedAirport] = useState<Airport | null>(null);
   const [weather, setWeather] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const fetchAirports = async () => {
-      try {
-        const res = await axios.get(`${API}/api/airports`);
-        setAirports(res.data.data || []);
-      } catch (e) {
-        console.error("Failed to fetch airports");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchAirports();
+    // Relying on static data
   }, []);
 
   const handleSelectAirport = async (airport: Airport) => {
