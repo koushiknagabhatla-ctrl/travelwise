@@ -4,7 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import NavHeader from "../components/ui/nav-header";
-import { GlassCard } from "../components/ui/glass-card";
+import { Card } from "../components/ui/glass-card";
 import { Sparkles, Plane, Palmtree, Mountain, Building2, ArrowRight, IndianRupee } from "lucide-react";
 
 interface Destination {
@@ -55,36 +55,58 @@ export default function TripSuggestPage() {
   };
 
   const vibeOptions = [
-    { key: "beach", icon: <Palmtree className="w-6 h-6" />, label: "Beach", color: "text-cyan-glow" },
-    { key: "mountain", icon: <Mountain className="w-6 h-6" />, label: "Mountains", color: "text-amber-glow" },
-    { key: "city", icon: <Building2 className="w-6 h-6" />, label: "City", color: "text-indigo-glow" },
+    { key: "beach", icon: <Palmtree className="w-6 h-6" />, label: "Beach", activeColor: "text-primary border-primary bg-primary-50" },
+    { key: "mountain", icon: <Mountain className="w-6 h-6" />, label: "Mountains", activeColor: "text-accent border-accent bg-accent-50" },
+    { key: "city", icon: <Building2 className="w-6 h-6" />, label: "City", activeColor: "text-info border-info bg-blue-50" },
   ];
 
   return (
-    <div className="min-h-screen bg-void">
+    <div className="min-h-screen bg-bg-primary">
       <NavHeader />
-      <div className="pt-28 px-6 pb-24">
-        <div className="max-w-4xl mx-auto">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-10">
-            <div className="inline-flex items-center gap-2 glass rounded-full px-4 py-1.5 mb-4">
-              <Sparkles className="w-4 h-4 text-amber-glow" />
-              <span className="text-sm font-medium text-silver">AI-Powered</span>
-            </div>
-            <h1 className="text-4xl font-black font-display gradient-text-frost mb-3">Trip Suggester</h1>
-            <p className="text-silver">Tell us your vibe and we'll find the perfect destination</p>
-          </motion.div>
 
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-            <GlassCard className="p-8 mb-8">
+      <section className="pt-28 pb-8 md:pt-36 md:pb-12 px-4 bg-gradient-to-b from-primary-50 to-white">
+        <div className="max-w-4xl mx-auto text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="inline-flex items-center gap-2 bg-accent-50 text-accent rounded-full px-4 py-1.5 mb-4"
+          >
+            <Sparkles className="w-4 h-4" />
+            <span className="text-sm font-semibold">AI-Powered</span>
+          </motion.div>
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-4xl font-extrabold font-display text-text-primary mb-3"
+          >
+            Trip Suggester
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="text-text-secondary"
+          >
+            Tell us your vibe and we&apos;ll find the perfect destination
+          </motion.p>
+        </div>
+      </section>
+
+      <div className="px-4 pb-20">
+        <div className="max-w-4xl mx-auto">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
+            <Card variant="elevated" padding="lg" className="mb-8 -mt-4">
               {/* Vibe Selection */}
-              <label className="text-sm font-bold text-frost block mb-3">What's your vibe?</label>
+              <label className="text-sm font-bold text-text-primary block mb-3">What&apos;s your vibe?</label>
               <div className="grid grid-cols-3 gap-3 mb-6">
                 {vibeOptions.map((opt) => (
                   <button
                     key={opt.key}
                     onClick={() => setVibe(opt.key as typeof vibe)}
-                    className={`glass rounded-xl p-4 flex flex-col items-center gap-2 transition-all cursor-pointer ${
-                      vibe === opt.key ? `border-white/20 bg-white/5 ${opt.color}` : "text-ash hover:text-frost hover:bg-white/[0.02]"
+                    className={`rounded-xl p-4 flex flex-col items-center gap-2 transition-all cursor-pointer border ${
+                      vibe === opt.key
+                        ? opt.activeColor
+                        : "border-border text-text-muted hover:text-text-primary hover:border-border bg-white"
                     }`}
                   >
                     {opt.icon}
@@ -95,20 +117,20 @@ export default function TripSuggestPage() {
 
               <div className="grid grid-cols-2 gap-4 mb-6">
                 <div>
-                  <label className="text-sm font-bold text-frost block mb-2">Budget (per person)</label>
+                  <label className="text-sm font-bold text-text-primary block mb-2">Budget (per person)</label>
                   <div className="relative">
-                    <IndianRupee className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ash" />
+                    <IndianRupee className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
                     <input
                       type="number" placeholder="e.g., 10000" value={budget}
-                      onChange={(e) => setBudget(e.target.value)} className="input-glass pl-10"
+                      onChange={(e) => setBudget(e.target.value)} className="input-field pl-10"
                     />
                   </div>
                 </div>
                 <div>
-                  <label className="text-sm font-bold text-frost block mb-2">Duration</label>
-                  <select value={days} onChange={(e) => setDays(e.target.value)} className="input-glass appearance-none cursor-pointer">
+                  <label className="text-sm font-bold text-text-primary block mb-2">Duration</label>
+                  <select value={days} onChange={(e) => setDays(e.target.value)} className="input-field appearance-none cursor-pointer">
                     {[2, 3, 4, 5, 7, 10].map((d) => (
-                      <option key={d} value={d} className="bg-onyx">{d} days</option>
+                      <option key={d} value={d}>{d} days</option>
                     ))}
                   </select>
                 </div>
@@ -117,11 +139,11 @@ export default function TripSuggestPage() {
               <button
                 onClick={handleSuggest}
                 disabled={!vibe}
-                className="btn-primary w-full py-3.5 flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
+                className="btn-primary w-full py-3.5 flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer rounded-xl"
               >
                 <Sparkles className="w-4 h-4" /> Find My Trip
               </button>
-            </GlassCard>
+            </Card>
           </motion.div>
 
           {/* Results */}
@@ -132,7 +154,7 @@ export default function TripSuggestPage() {
                 animate={{ opacity: 1, y: 0 }}
                 className="space-y-4"
               >
-                <h2 className="text-xl font-bold font-display text-frost mb-2">
+                <h2 className="text-xl font-bold font-display text-text-primary mb-2">
                   {results.length} destination{results.length !== 1 ? "s" : ""} found
                 </h2>
                 {results.map((dest, idx) => (
@@ -142,34 +164,34 @@ export default function TripSuggestPage() {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: idx * 0.1 }}
                   >
-                    <GlassCard className="p-6" hover>
+                    <Card variant="default" padding="md" hover>
                       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-2">
-                            <div className="w-10 h-10 rounded-xl glass-md flex items-center justify-center text-sm font-bold text-cyan-glow">
+                            <div className="w-10 h-10 rounded-xl bg-primary-50 flex items-center justify-center text-sm font-bold text-primary">
                               {dest.airport}
                             </div>
                             <div>
-                              <h3 className="text-lg font-bold text-frost">{dest.city}</h3>
-                              <p className="text-xs text-ash">{dest.duration} · Best: {dest.bestMonth}</p>
+                              <h3 className="text-lg font-bold text-text-primary">{dest.city}</h3>
+                              <p className="text-xs text-text-muted">{dest.duration} · Best: {dest.bestMonth}</p>
                             </div>
                           </div>
-                          <p className="text-sm text-silver">{dest.description}</p>
+                          <p className="text-sm text-text-secondary">{dest.description}</p>
                         </div>
                         <div className="flex items-center gap-4">
                           <div className="text-right">
-                            <div className="text-sm text-ash">from</div>
-                            <div className="text-2xl font-black text-cyan-glow">₹{dest.price.toLocaleString("en-IN")}</div>
+                            <div className="text-sm text-text-muted">from</div>
+                            <div className="text-2xl font-extrabold text-accent">₹{dest.price.toLocaleString("en-IN")}</div>
                           </div>
                           <button
                             onClick={() => router.push(`/search?from=DEL&to=${dest.airport}&date=&pax=1&carrier=All&mode=flights`)}
-                            className="btn-primary px-4 py-2 flex items-center gap-1 cursor-pointer"
+                            className="btn-primary px-4 py-2 flex items-center gap-1 cursor-pointer rounded-lg"
                           >
                             <Plane className="w-4 h-4" /> <ArrowRight className="w-4 h-4" />
                           </button>
                         </div>
                       </div>
-                    </GlassCard>
+                    </Card>
                   </motion.div>
                 ))}
               </motion.div>

@@ -3,31 +3,40 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 
-interface GlassCardProps extends React.HTMLAttributes<HTMLDivElement> {
-  glow?: "none" | "cyan" | "amber" | "subtle";
+interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
+  variant?: "default" | "elevated" | "outlined" | "flat";
   hover?: boolean;
+  padding?: "none" | "sm" | "md" | "lg";
 }
 
-export function GlassCard({
+export function Card({
   className,
-  glow = "none",
-  hover = true,
+  variant = "default",
+  hover = false,
+  padding = "md",
   children,
   ...props
-}: GlassCardProps) {
-  const glowClasses = {
+}: CardProps) {
+  const variants = {
+    default: "bg-white border border-border rounded-xl shadow-card",
+    elevated: "bg-white rounded-xl shadow-lg",
+    outlined: "bg-white border border-border rounded-xl",
+    flat: "bg-bg-secondary rounded-xl",
+  };
+
+  const paddings = {
     none: "",
-    cyan: "glow-cyan",
-    amber: "glow-amber",
-    subtle: "shadow-[0_0_40px_rgba(255,255,255,0.03)]",
+    sm: "p-4",
+    md: "p-6",
+    lg: "p-8",
   };
 
   return (
     <div
       className={cn(
-        "glass-card rounded-2xl p-6",
-        hover && "glass-card-hover",
-        glowClasses[glow],
+        variants[variant],
+        paddings[padding],
+        hover && "transition-all duration-300 hover:shadow-card-hover hover:-translate-y-1 cursor-pointer",
         className
       )}
       {...props}
@@ -37,4 +46,4 @@ export function GlassCard({
   );
 }
 
-export default GlassCard;
+export default Card;

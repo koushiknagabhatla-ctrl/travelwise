@@ -4,8 +4,8 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import NavHeader from "../components/ui/nav-header";
-import { GlassCard } from "../components/ui/glass-card";
-import { Calendar, MapPin, ArrowRight, ChevronLeft, ChevronRight, TrendingDown } from "lucide-react";
+import { Card } from "../components/ui/glass-card";
+import { Calendar, MapPin, ChevronLeft, ChevronRight, TrendingDown } from "lucide-react";
 
 export default function FareCalendarPage() {
   const router = useRouter();
@@ -13,7 +13,6 @@ export default function FareCalendarPage() {
   const [to, setTo] = useState("BOM");
   const [currentMonth, setCurrentMonth] = useState(new Date());
 
-  // Generate mock fare data for the month
   const generateFares = () => {
     const year = currentMonth.getFullYear();
     const month = currentMonth.getMonth();
@@ -22,7 +21,7 @@ export default function FareCalendarPage() {
 
     for (let d = 1; d <= daysInMonth; d++) {
       const date = new Date(year, month, d);
-      if (date < new Date()) continue; // Skip past dates
+      if (date < new Date()) continue;
       const dayOfWeek = date.getDay();
       const basePrice = 3500;
       const weekendSurcharge = dayOfWeek === 0 || dayOfWeek === 6 ? 1500 : 0;
@@ -49,74 +48,89 @@ export default function FareCalendarPage() {
   };
 
   return (
-    <div className="min-h-screen bg-void">
+    <div className="min-h-screen bg-bg-primary">
       <NavHeader />
 
-      <div className="pt-28 px-6 pb-24">
-        <div className="max-w-4xl mx-auto">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-10">
-            <h1 className="text-4xl font-black font-display gradient-text-frost mb-3">Fare Calendar</h1>
-            <p className="text-silver">Find the cheapest day to fly at a glance</p>
-          </motion.div>
+      <section className="pt-28 pb-8 md:pt-36 md:pb-12 px-4 bg-gradient-to-b from-primary-50 to-white">
+        <div className="max-w-4xl mx-auto text-center">
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-4xl font-extrabold font-display text-text-primary mb-3"
+          >
+            Fare Calendar
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="text-text-secondary"
+          >
+            Find the cheapest day to fly at a glance
+          </motion.p>
+        </div>
+      </section>
 
+      <div className="px-4 pb-20">
+        <div className="max-w-4xl mx-auto">
           {/* Route Input */}
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-            <GlassCard className="p-6 mb-8">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
+            <Card variant="elevated" padding="md" className="mb-6 -mt-4">
               <div className="flex flex-col md:flex-row gap-4 items-end">
                 <div className="flex-1">
-                  <label className="text-xs font-bold text-ash uppercase tracking-wider block mb-2">From</label>
+                  <label className="text-xs font-semibold text-text-muted uppercase tracking-wider block mb-2">From</label>
                   <div className="relative">
-                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ash" />
-                    <input value={from} onChange={(e) => setFrom(e.target.value.toUpperCase())} className="input-glass pl-10" placeholder="DEL" />
+                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+                    <input value={from} onChange={(e) => setFrom(e.target.value.toUpperCase())} className="input-field pl-10" placeholder="DEL" />
                   </div>
                 </div>
                 <div className="flex-1">
-                  <label className="text-xs font-bold text-ash uppercase tracking-wider block mb-2">To</label>
+                  <label className="text-xs font-semibold text-text-muted uppercase tracking-wider block mb-2">To</label>
                   <div className="relative">
-                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-cyan-glow" />
-                    <input value={to} onChange={(e) => setTo(e.target.value.toUpperCase())} className="input-glass pl-10" placeholder="BOM" />
+                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary" />
+                    <input value={to} onChange={(e) => setTo(e.target.value.toUpperCase())} className="input-field pl-10" placeholder="BOM" />
                   </div>
                 </div>
               </div>
-            </GlassCard>
+            </Card>
           </motion.div>
 
           {/* Calendar */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-            <GlassCard className="p-6">
+            <Card variant="default" padding="md">
               {/* Month Nav */}
               <div className="flex items-center justify-between mb-6">
-                <button onClick={prevMonth} className="glass rounded-lg p-2 hover:bg-white/5 transition-all cursor-pointer">
-                  <ChevronLeft className="w-5 h-5 text-frost" />
+                <button onClick={prevMonth} className="bg-bg-secondary border border-border rounded-lg p-2 hover:bg-border-light transition-all cursor-pointer">
+                  <ChevronLeft className="w-5 h-5 text-text-primary" />
                 </button>
-                <h2 className="text-xl font-bold font-display text-frost">
+                <h2 className="text-xl font-bold font-display text-text-primary">
                   {currentMonth.toLocaleDateString("en-IN", { month: "long", year: "numeric" })}
                 </h2>
-                <button onClick={nextMonth} className="glass rounded-lg p-2 hover:bg-white/5 transition-all cursor-pointer">
-                  <ChevronRight className="w-5 h-5 text-frost" />
+                <button onClick={nextMonth} className="bg-bg-secondary border border-border rounded-lg p-2 hover:bg-border-light transition-all cursor-pointer">
+                  <ChevronRight className="w-5 h-5 text-text-primary" />
                 </button>
               </div>
 
               {/* Legend */}
               <div className="flex gap-4 mb-6 justify-center text-xs">
                 <div className="flex items-center gap-1.5">
-                  <div className="w-3 h-3 rounded bg-cyan-glow/30" />
-                  <span className="text-silver">Cheap</span>
+                  <div className="w-3 h-3 rounded bg-success/20 border border-success/40" />
+                  <span className="text-text-muted">Cheap</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <div className="w-3 h-3 rounded bg-amber-glow/30" />
-                  <span className="text-silver">Moderate</span>
+                  <div className="w-3 h-3 rounded bg-accent-50 border border-accent/40" />
+                  <span className="text-text-muted">Moderate</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <div className="w-3 h-3 rounded bg-rose-glow/30" />
-                  <span className="text-silver">Expensive</span>
+                  <div className="w-3 h-3 rounded bg-red-50 border border-error/40" />
+                  <span className="text-text-muted">Expensive</span>
                 </div>
               </div>
 
               {/* Day Headers */}
               <div className="grid grid-cols-7 gap-2 mb-2">
                 {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
-                  <div key={d} className="text-center text-xs font-bold text-ash uppercase">{d}</div>
+                  <div key={d} className="text-center text-xs font-semibold text-text-muted uppercase">{d}</div>
                 ))}
               </div>
 
@@ -137,34 +151,34 @@ export default function FareCalendarPage() {
                       whileHover={fare ? { scale: 1.05 } : undefined}
                       onClick={() => fare && handleDayClick(day)}
                       disabled={!fare || isPast}
-                      className={`relative rounded-xl p-2 text-center transition-all cursor-pointer min-h-[72px] flex flex-col justify-between ${
+                      className={`relative rounded-xl p-2 text-center transition-all cursor-pointer min-h-[72px] flex flex-col justify-between border ${
                         isPast || !fare
-                          ? "opacity-30 cursor-not-allowed"
+                          ? "opacity-30 cursor-not-allowed bg-bg-secondary border-transparent"
                           : fare.level === "low"
-                          ? "glass border border-cyan-glow/20 hover:border-cyan-glow/40"
+                          ? "bg-success/5 border-success/20 hover:border-success/40 hover:shadow-sm"
                           : fare.level === "mid"
-                          ? "glass border border-amber-glow/20 hover:border-amber-glow/40"
-                          : "glass border border-rose-glow/20 hover:border-rose-glow/40"
+                          ? "bg-accent-50 border-accent/20 hover:border-accent/40 hover:shadow-sm"
+                          : "bg-red-50 border-error/20 hover:border-error/40 hover:shadow-sm"
                       }`}
                     >
-                      <span className="text-xs font-semibold text-silver">{day}</span>
+                      <span className="text-xs font-semibold text-text-secondary">{day}</span>
                       {fare && (
                         <span className={`text-xs font-bold mt-1 ${
-                          fare.level === "low" ? "text-cyan-glow" : fare.level === "mid" ? "text-amber-glow" : "text-rose-glow"
+                          fare.level === "low" ? "text-success" : fare.level === "mid" ? "text-accent" : "text-error"
                         }`}>
                           ₹{(fare.price / 1000).toFixed(1)}k
                         </span>
                       )}
                       {isCheapest && (
-                        <span className="absolute -top-1 -right-1 w-4 h-4 bg-cyan-glow rounded-full flex items-center justify-center">
-                          <TrendingDown className="w-2.5 h-2.5 text-void" />
+                        <span className="absolute -top-1 -right-1 w-4 h-4 bg-success rounded-full flex items-center justify-center">
+                          <TrendingDown className="w-2.5 h-2.5 text-white" />
                         </span>
                       )}
                     </motion.button>
                   );
                 })}
               </div>
-            </GlassCard>
+            </Card>
           </motion.div>
         </div>
       </div>
