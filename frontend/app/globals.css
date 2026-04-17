@@ -264,4 +264,48 @@
     pointer-events: none;
     z-index: 1;
   }
+
+  /* ---------- COSMIC PARALLAX ---------- */
+  .cosmic-stars { width: 1px; height: 1px; background: transparent; animation: animStar 50s linear var(--animation-iteration); }
+  .cosmic-stars::after { content: " "; position: absolute; top: 2000px; width: 1px; height: 1px; background: transparent; box-shadow: inherit; }
+  
+  .cosmic-stars-medium { width: 2px; height: 2px; background: transparent; animation: animStar 100s linear var(--animation-iteration); }
+  .cosmic-stars-medium::after { content: " "; position: absolute; top: 2000px; width: 2px; height: 2px; background: transparent; box-shadow: inherit; }
+  
+  .cosmic-stars-large { width: 3px; height: 3px; background: transparent; animation: animStar 150s linear var(--animation-iteration); }
+  .cosmic-stars-large::after { content: " "; position: absolute; top: 2000px; width: 3px; height: 3px; background: transparent; box-shadow: inherit; }
+
+  .subtitle-part-1 { animation: animGravity 4s linear infinite; display: inline-block; }
+  .subtitle-part-2 { animation: animDont 4s linear infinite; display: inline-block; }
+  .subtitle-part-3 { animation: animLet 4s linear infinite; display: inline-block; }
+  .subtitle-part-4 { animation: animGo 4s linear infinite; display: inline-block; }
+}
+
+:root {
+  --animation-iteration: infinite;
+}
+
+@keyframes animStar {
+  from { transform: translateY(0px); }
+  to { transform: translateY(-2000px); }
+}
+@keyframes animGravity {
+  0% { transform: translateY(-26px); opacity: 0; }
+  30%, 80% { transform: translateY(0px); opacity: 1; }
+  92%, 100% { transform: translateY(-4px); opacity: 0; }
+}
+@keyframes animDont {
+  0%, 15% { transform: translateY(-26px); opacity: 0; }
+  35%, 80% { transform: translateY(0px); opacity: 1; }
+  92%, 100% { transform: translateY(-4px); opacity: 0; }
+}
+@keyframes animLet {
+  0%, 25% { transform: translateY(-26px); opacity: 0; }
+  45%, 80% { transform: translateY(0px); opacity: 1; }
+  92%, 100% { transform: translateY(-4px); opacity: 0; }
+}
+@keyframes animGo {
+  0%, 35% { transform: translateY(-26px); opacity: 0; }
+  55%, 80% { transform: translateY(0px); opacity: 1; }
+  92%, 100% { transform: translateY(-4px); opacity: 0; }
 }
