@@ -1,249 +1,513 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { PlaneTakeoff, Train, Search, MapPin, Calendar, Users, ChevronDown } from 'lucide-react';
-import axios from 'axios';
+import React, { useState, useEffect, useRef } from "react";
+import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import NavHeader from "./components/ui/nav-header";
+import { GlassCard } from "./components/ui/glass-card";
+import {
+  Plane,
+  Search,
+  MapPin,
+  Calendar,
+  Users,
+  ArrowRight,
+  TrendingDown,
+  Shield,
+  Clock,
+  Zap,
+  Globe,
+  BarChart3,
+  Sparkles,
+  ChevronRight,
+} from "lucide-react";
 
-const AIRLINES = ['IndiGo', 'Air India', 'Vistara', 'SpiceJet', 'Akasa Air', 'GoFirst', 'Alliance Air', 'Star Air', 'Blue Dart'];
-const TRAINS = ['Indian Railways (IRCTC)'];
-
-interface Airport {
-  code: string;
-  name: string;
-  city: string;
-}
-
-export default function Home() {
-  const router = useRouter();
-  const [activeTab, setActiveTab] = useState<'flights' | 'trains'>('flights');
-  const [selectedCarrier, setSelectedCarrier] = useState('IndiGo');
-  
-  const [from, setFrom] = useState('');
-  const [to, setTo] = useState('');
-  const [date, setDate] = useState('');
-  const [passengers, setPassengers] = useState('1');
-
-  const [airports, setAirports] = useState<Airport[]>([]);
-  const [showFromDrop, setShowFromDrop] = useState(false);
-  const [showToDrop, setShowToDrop] = useState(false);
+// ─── HERO BACKGROUND ANIMATION (DigitalSerenity-inspired) ───
+function HeroBackground() {
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0, opacity: 0 });
+  const [ripples, setRipples] = useState<{ id: number; x: number; y: number }[]>([]);
 
   useEffect(() => {
-    const loadAirports = async () => {
-      try {
-        const res = await axios.get('http://localhost:5002/api/airports');
-        if (res.data.success) setAirports(res.data.data);
-      } catch (e) {
-        console.error("Failed to load airports");
-      }
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePos({ x: e.clientX, y: e.clientY, opacity: 1 });
     };
-    loadAirports();
+    const handleMouseLeave = () => {
+      setMousePos((prev) => ({ ...prev, opacity: 0 }));
+    };
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseleave", handleMouseLeave);
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseleave", handleMouseLeave);
+    };
   }, []);
+
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      const newRipple = { id: Date.now(), x: e.clientX, y: e.clientY };
+      setRipples((prev) => [...prev, newRipple]);
+      setTimeout(() => setRipples((prev) => prev.filter((r) => r.id !== newRipple.id)), 1000);
+    };
+    document.addEventListener("click", handleClick);
+    return () => document.removeEventListener("click", handleClick);
+  }, []);
+
+  return (
+    <>
+      {/* Grid Pattern */}
+      <svg className="absolute inset-0 w-full h-full pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <pattern id="heroGrid" width="60" height="60" patternUnits="userSpaceOnUse">
+            <path d="M 60 0 L 0 0 0 60" fill="none" stroke="rgba(100, 116, 139, 0.06)" strokeWidth="0.5" />
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#heroGrid)" />
+        {/* Animated grid lines */}
+        {[20, 50, 80].map((pos, i) => (
+          <React.Fragment key={i}>
+            <line x1="0" y1={`${pos}%`} x2="100%" y2={`${pos}%`}
+              stroke="rgba(148, 163, 184, 0.08)" strokeWidth="0.5"
+              strokeDasharray="5 5" style={{ animation: `gridDraw 2s ease-out ${0.5 + i * 0.5}s forwards`, opacity: 0 }} />
+            <line x1={`${pos}%`} y1="0" x2={`${pos}%`} y2="100%"
+              stroke="rgba(148, 163, 184, 0.08)" strokeWidth="0.5"
+              strokeDasharray="5 5" style={{ animation: `gridDraw 2s ease-out ${1 + i * 0.5}s forwards`, opacity: 0 }} />
+          </React.Fragment>
+        ))}
+        {/* Intersection dots */}
+        {[[20, 20], [80, 20], [50, 50], [20, 80], [80, 80]].map(([cx, cy], i) => (
+          <circle key={i} cx={`${cx}%`} cy={`${cy}%`} r="1.5"
+            fill="rgba(6, 214, 160, 0.3)"
+            style={{ animation: `pulseGlowDot 3s ease-in-out ${3 + i * 0.3}s infinite`, opacity: 0 }} />
+        ))}
+      </svg>
+
+      {/* Floating particles */}
+      {[
+        { top: "15%", left: "10%", delay: 0 },
+        { top: "25%", left: "85%", delay: 1 },
+        { top: "55%", left: "5%", delay: 2 },
+        { top: "70%", left: "90%", delay: 3 },
+        { top: "40%", left: "45%", delay: 1.5 },
+      ].map((p, i) => (
+        <div key={i} className="absolute w-1 h-1 bg-cyan-glow/30 rounded-full animate-float"
+          style={{ top: p.top, left: p.left, animationDelay: `${p.delay}s`, animationDuration: `${4 + i}s` }} />
+      ))}
+
+      {/* Mouse follower gradient */}
+      <div
+        className="fixed pointer-events-none rounded-full w-80 h-80 blur-3xl transition-all duration-100 ease-linear"
+        style={{
+          left: mousePos.x,
+          top: mousePos.y,
+          opacity: mousePos.opacity * 0.3,
+          transform: "translate(-50%, -50%)",
+          background: "radial-gradient(circle, rgba(6, 214, 160, 0.08), rgba(124, 58, 237, 0.04), transparent 70%)",
+        }}
+      />
+
+      {/* Click ripples */}
+      {ripples.map((r) => (
+        <div key={r.id} className="fixed w-2 h-2 rounded-full pointer-events-none z-50"
+          style={{
+            left: r.x, top: r.y,
+            background: "rgba(6, 214, 160, 0.5)",
+            transform: "translate(-50%, -50%)",
+            animation: "rippleOut 0.8s ease-out forwards",
+          }} />
+      ))}
+
+      {/* Ambient gradient orbs */}
+      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-bl from-cyan-glow/5 via-transparent to-transparent rounded-full blur-3xl" />
+      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-gradient-to-tr from-indigo-glow/5 via-transparent to-transparent rounded-full blur-3xl" />
+
+      <style jsx>{`
+        @keyframes gridDraw { 0% { stroke-dashoffset: 1000; opacity: 0; } 50% { opacity: 0.3; } 100% { stroke-dashoffset: 0; opacity: 0.08; } }
+        @keyframes pulseGlowDot { 0%, 100% { opacity: 0.2; transform: scale(1); } 50% { opacity: 0.6; transform: scale(1.5); } }
+        @keyframes rippleOut { 0% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; } 100% { transform: translate(-50%, -50%) scale(40); opacity: 0; } }
+      `}</style>
+    </>
+  );
+}
+
+// ─── SEARCH WIDGET ───
+function FlightSearchWidget() {
+  const router = useRouter();
+  const [tripType, setTripType] = useState<"one-way" | "round" | "multi">("one-way");
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
+  const [date, setDate] = useState("");
+  const [pax, setPax] = useState("1");
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!from || !to || !date) return alert('Please complete the origin, destination, and date fields.');
-    const fromCode = from.split('(')[1]?.split(')')[0] || from;
-    const toCode = to.split('(')[1]?.split(')')[0] || to;
-    router.push(`/search?mode=${activeTab}&carrier=${encodeURIComponent(selectedCarrier)}&from=${encodeURIComponent(fromCode)}&to=${encodeURIComponent(toCode)}&date=${date}&pax=${passengers}`);
-  };
-
-  const filteredAirports = (val: string) => {
-    if (!val) return airports.slice(0, 5);
-    return airports.filter(a => 
-      a.city.toLowerCase().includes(val.toLowerCase()) || 
-      a.code.toLowerCase().includes(val.toLowerCase()) ||
-      a.name.toLowerCase().includes(val.toLowerCase())
-    ).slice(0, 8);
+    router.push(`/search?mode=flights&from=${from}&to=${to}&date=${date}&pax=${pax}&carrier=All`);
   };
 
   return (
-    <div className="bg-white min-h-screen text-navy">
-      
-      {/* ── HERO SECTION ── */}
-      <section className="relative pt-24 pb-32 px-6 overflow-hidden">
-        {/* Subtle Decorative Background Shapes */}
-        <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-red-50 rounded-full blur-3xl opacity-50 -translate-y-1/2 translate-x-1/3 pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-blue-50 rounded-full blur-3xl opacity-50 translate-y-1/3 -translate-x-1/4 pointer-events-none" />
+    <motion.div
+      initial={{ opacity: 0, y: 40 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.8, delay: 1.2, ease: [0.16, 1, 0.3, 1] }}
+    >
+      <GlassCard className="max-w-4xl mx-auto p-6 md:p-8 rounded-3xl" glow="subtle">
+        {/* Trip Type Toggle */}
+        <div className="flex gap-1 mb-6 glass rounded-full p-1 w-fit">
+          {(["one-way", "round", "multi"] as const).map((type) => (
+            <button
+              key={type}
+              onClick={() => setTripType(type)}
+              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all cursor-pointer ${
+                tripType === type
+                  ? "bg-cyan-glow text-void"
+                  : "text-silver hover:text-frost"
+              }`}
+            >
+              {type === "one-way" ? "One Way" : type === "round" ? "Round Trip" : "Multi-City"}
+            </button>
+          ))}
+        </div>
 
-        <div className="max-w-7xl mx-auto relative z-10 text-center">
-          <span className="inline-block py-1.5 px-4 rounded-full bg-navy/5 text-accent font-bold text-sm tracking-wider mb-6 border border-accent/10">
-            INDIA'S PREMIER BOOKING ENGINE
-          </span>
-          <h1 className="text-5xl md:text-7xl font-black tracking-tight text-navy mb-6 leading-[1.1]">
-            Experience Travel <br />
-            <span className="text-accent relative inline-block">
-              Without Limits.
-              <svg className="absolute w-full h-3 -bottom-1 left-0 text-accent/20" viewBox="0 0 100 10" preserveAspectRatio="none">
-                <path d="M0 5 Q 50 15 100 5" stroke="currentColor" strokeWidth="4" fill="none" />
-              </svg>
-            </span>
-          </h1>
-          <p className="text-lg md:text-xl text-gray-500 max-w-2xl mx-auto mb-16 font-medium">
-            Search live database availability across all major domestic carriers and the entire Indian Railway network securely.
-          </p>
-
-          {/* ── SEARCH WIDGET ── */}
-          <div className="max-w-5xl mx-auto bg-white rounded-2xl shadow-[0_20px_60px_-15px_rgba(26,26,46,0.15)] border border-gray-100 p-3 relative">
-            
-            {/* Mode Selectors */}
-            <div className="flex absolute -top-12 left-8 gap-2">
-              <button 
-                onClick={() => { setActiveTab('flights'); setSelectedCarrier('IndiGo'); }}
-                className={`flex items-center gap-2 px-6 py-3 rounded-t-xl font-bold transition-colors ${activeTab === 'flights' ? 'bg-white text-navy shadow-[0_-5px_20px_rgba(0,0,0,0.05)]' : 'bg-gray-100 text-gray-400 hover:bg-gray-50'}`}
-              >
-                <PlaneTakeoff size={20} className={activeTab === 'flights' ? 'text-accent' : ''} />
-                Flights
-              </button>
-              <button 
-                onClick={() => { setActiveTab('trains'); setSelectedCarrier('Indian Railways (IRCTC)'); }}
-                className={`flex items-center gap-2 px-6 py-3 rounded-t-xl font-bold transition-colors ${activeTab === 'trains' ? 'bg-white text-navy shadow-[0_-5px_20px_rgba(0,0,0,0.05)]' : 'bg-gray-100 text-gray-400 hover:bg-gray-50'}`}
-              >
-                <Train size={20} className={activeTab === 'trains' ? 'text-accent' : ''} />
-                Trains
-              </button>
+        <form onSubmit={handleSearch}>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div className="relative">
+              <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ash" />
+              <input
+                type="text"
+                placeholder="From — City or Airport"
+                value={from}
+                onChange={(e) => setFrom(e.target.value)}
+                className="input-glass pl-10"
+                required
+              />
             </div>
-
-            <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-2 bg-gray-50 p-4 rounded-xl">
-              <div className="flex-1 relative">
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 z-10"><MapPin size={20} /></div>
-                <input 
-                  type="text" 
-                  placeholder={activeTab === 'flights' ? 'Leaving from' : 'Station from'} 
-                  value={from} 
-                  onChange={e => { setFrom(e.target.value); setShowFromDrop(true); }}
-                  onFocus={() => setShowFromDrop(true)}
-                  className="w-full pl-12 pr-4 py-4 rounded-lg border-none focus:ring-2 focus:ring-accent outline-none font-semibold text-lg bg-white" 
-                  required 
-                />
-                {showFromDrop && (
-                  <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-soft border border-gray-100 z-50 py-1 overflow-hidden">
-                    {filteredAirports(from).map(a => (
-                      <button key={a.code} type="button" onClick={() => { setFrom(`${a.city} (${a.code})`); setShowFromDrop(false); }} className="w-full px-4 py-3 text-left hover:bg-gray-50 flex justify-between items-center transition-colors border-b border-gray-50 last:border-0">
-                        <div>
-                          <div className="font-bold text-navy">{a.city}</div>
-                          <div className="text-xs text-gray-400 font-medium">{a.name}</div>
-                        </div>
-                        <div className="font-black text-accent text-sm">{a.code}</div>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              <div className="flex-1 relative">
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 z-10"><MapPin size={20} /></div>
-                <input 
-                  type="text" 
-                  placeholder={activeTab === 'flights' ? 'Going to' : 'Station to'} 
-                  value={to} 
-                  onChange={e => { setTo(e.target.value); setShowToDrop(true); }}
-                  onFocus={() => setShowToDrop(true)}
-                  className="w-full pl-12 pr-4 py-4 rounded-lg border-none focus:ring-2 focus:ring-accent outline-none font-semibold text-lg bg-white" 
-                  required 
-                />
-                {showToDrop && (
-                  <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-soft border border-gray-100 z-50 py-1 overflow-hidden">
-                    {filteredAirports(to).map(a => (
-                      <button key={a.code} type="button" onClick={() => { setTo(`${a.city} (${a.code})`); setShowToDrop(false); }} className="w-full px-4 py-3 text-left hover:bg-gray-50 flex justify-between items-center transition-colors border-b border-gray-50 last:border-0">
-                        <div>
-                          <div className="font-bold text-navy">{a.city}</div>
-                          <div className="text-xs text-gray-400 font-medium">{a.name}</div>
-                        </div>
-                        <div className="font-black text-accent text-sm">{a.code}</div>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-              <div className="flex-1 relative">
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"><Calendar size={20} /></div>
-                <input type="date" value={date} onChange={e => setDate(e.target.value)} className="w-full pl-12 pr-4 py-4 rounded-lg border-none focus:ring-2 focus:ring-accent outline-none font-semibold text-lg bg-white text-gray-600" required />
-              </div>
-              <div className="w-40 relative hidden lg:block">
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"><Users size={20} /></div>
-                <select value={passengers} onChange={e => setPassengers(e.target.value)} className="w-full pl-12 pr-4 py-4 rounded-lg border-none focus:ring-2 focus:ring-accent outline-none font-semibold text-lg bg-white appearance-none cursor-pointer">
-                  {[1,2,3,4,5,6].map(n => <option key={n} value={n}>{n} Pax</option>)}
-                </select>
-              </div>
-              <button type="submit" className="bg-accent hover:bg-accent-hover text-white px-10 py-4 rounded-lg font-bold text-lg transition-transform hover:-translate-y-0.5 shadow-accent flex items-center justify-center gap-2">
-                <Search size={22} /> Search
-              </button>
-            </form>
-          </div>
-        </div>
-      </section>
-
-      {/* ── CARRIER SELECTION GRID ── */}
-      <section className="bg-gray-50/50 border-t border-gray-100 py-20 px-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="mb-12">
-            <h2 className="text-3xl font-black text-navy mb-2">Preferred Partners</h2>
-            <p className="text-gray-500 text-lg">Click an airline or railway operator below to filter live API availability immediately during search.</p>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            {(activeTab === 'flights' ? AIRLINES : TRAINS).map((carrier) => (
-              <div 
-                key={carrier}
-                onClick={() => setSelectedCarrier(carrier)}
-                className={`
-                  p-6 rounded-xl border flex flex-col items-center justify-center gap-3 cursor-pointer transition-all duration-300
-                  ${selectedCarrier === carrier 
-                    ? 'border-accent bg-accent/5 shadow-[0_4px_20px_rgba(230,57,70,0.15)] -translate-y-1' 
-                    : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm hover:-translate-y-0.5'
-                  }
-                `}
+            <div className="relative">
+              <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-cyan-glow" />
+              <input
+                type="text"
+                placeholder="To — City or Airport"
+                value={to}
+                onChange={(e) => setTo(e.target.value)}
+                className="input-glass pl-10"
+                required
+              />
+            </div>
+            <div className="relative">
+              <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ash" />
+              <input
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className="input-glass pl-10"
+                required
+              />
+            </div>
+            <div className="relative">
+              <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ash" />
+              <select
+                value={pax}
+                onChange={(e) => setPax(e.target.value)}
+                className="input-glass pl-10 appearance-none cursor-pointer"
               >
-                <div className={`w-12 h-12 rounded-full flex items-center justify-center ${selectedCarrier === carrier ? 'bg-accent text-white' : 'bg-gray-100 text-navy'}`}>
-                  {activeTab === 'flights' ? <PlaneTakeoff size={24} /> : <Train size={24} />}
-                </div>
-                <span className={`font-semibold text-center ${selectedCarrier === carrier ? 'text-accent' : 'text-navy'}`}>
-                  {carrier}
-                </span>
-              </div>
-            ))}
+                {[1, 2, 3, 4, 5, 6].map((n) => (
+                  <option key={n} value={n} className="bg-onyx text-frost">
+                    {n} {n === 1 ? "Traveler" : "Travelers"}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
-        </div>
-      </section>
 
-      {/* ── FOOTER ── */}
-      <footer className="bg-navy pt-20 pb-10 px-6 border-t-[6px] border-accent">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
-          <div className="md:col-span-2">
-            <div className="flex items-center gap-2 mb-6">
-              <div className="bg-accent p-2 rounded-lg">
-                <PlaneTakeoff className="w-6 h-6 text-white" />
-              </div>
-              <span className="font-poppins font-black text-3xl tracking-tight text-white">
-                Travel<span className="text-accent">Wise</span>
+          <button
+            type="submit"
+            className="btn-primary w-full md:w-auto flex items-center justify-center gap-2 py-3.5 px-10 text-base cursor-pointer"
+          >
+            <Search className="w-5 h-5" />
+            Search Flights
+            <ArrowRight className="w-4 h-4" />
+          </button>
+        </form>
+      </GlassCard>
+    </motion.div>
+  );
+}
+
+// ─── FEATURE CARD ───
+function FeatureCard({
+  icon,
+  title,
+  description,
+  delay,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  delay: number;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{ duration: 0.6, delay, ease: [0.16, 1, 0.3, 1] }}
+    >
+      <GlassCard className="h-full group" hover>
+        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-glow/20 to-transparent flex items-center justify-center mb-4 group-hover:from-cyan-glow/30 transition-all">
+          {icon}
+        </div>
+        <h3 className="text-lg font-bold text-frost mb-2 font-display">{title}</h3>
+        <p className="text-silver text-sm leading-relaxed">{description}</p>
+      </GlassCard>
+    </motion.div>
+  );
+}
+
+// ─── STAT BLOCK ───
+function StatBlock({ value, label, delay }: { value: string; label: string; delay: number }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.8 }}
+      whileInView={{ opacity: 1, scale: 1 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.5, delay }}
+      className="text-center"
+    >
+      <div className="text-3xl md:text-4xl font-black gradient-text font-display">{value}</div>
+      <div className="text-silver text-sm mt-1">{label}</div>
+    </motion.div>
+  );
+}
+
+// ─── MAIN PAGE ───
+export default function Home() {
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const { scrollY } = useScroll();
+  const heroOpacity = useTransform(scrollY, [0, 600], [1, 0]);
+  const heroScale = useTransform(scrollY, [0, 600], [1, 0.95]);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("travelwise_recent");
+    if (saved) setRecentSearches(JSON.parse(saved));
+  }, []);
+
+  return (
+    <div className="min-h-screen bg-void overflow-hidden">
+      <NavHeader />
+
+      {/* ═══ HERO SECTION ═══ */}
+      <motion.section
+        style={{ opacity: heroOpacity, scale: heroScale }}
+        className="relative min-h-screen flex flex-col items-center justify-center px-6 pt-24 pb-12"
+      >
+        <HeroBackground />
+
+        {/* Hero Content */}
+        <div className="relative z-10 text-center max-w-5xl mx-auto mb-12">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="inline-flex items-center gap-2 glass rounded-full px-4 py-1.5 mb-8"
+          >
+            <span className="w-2 h-2 rounded-full bg-cyan-glow animate-pulse-glow" />
+            <span className="text-sm font-medium text-silver">Live flight data across India</span>
+          </motion.div>
+
+          <motion.h1
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.5 }}
+            className="text-4xl sm:text-5xl md:text-7xl font-black tracking-tight leading-[1.1] mb-6 font-display"
+          >
+            <span className="gradient-text-frost">Your journey begins</span>
+            <br />
+            <span className="gradient-text">with a single search.</span>
+          </motion.h1>
+
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.7 }}
+            className="text-lg md:text-xl text-silver max-w-2xl mx-auto leading-relaxed mb-4"
+          >
+            Real flights. Real prices. Compare fares, track flights live, and book with confidence —
+            all powered by real-time airline data.
+          </motion.p>
+
+          {/* Trust indicators */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.9 }}
+            className="flex items-center justify-center gap-6 text-xs text-ash mb-8"
+          >
+            <span className="flex items-center gap-1"><Shield className="w-3 h-3 text-cyan-glow" /> Secure Booking</span>
+            <span className="flex items-center gap-1"><Clock className="w-3 h-3 text-cyan-glow" /> Real-time Data</span>
+            <span className="flex items-center gap-1"><TrendingDown className="w-3 h-3 text-cyan-glow" /> Best Price Guarantee</span>
+          </motion.div>
+        </div>
+
+        {/* Search Widget */}
+        <div className="relative z-10 w-full">
+          <FlightSearchWidget />
+        </div>
+
+        {/* Recent Searches */}
+        {recentSearches.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.8 }}
+            className="relative z-10 mt-6 flex items-center gap-3 text-sm text-ash"
+          >
+            <Clock className="w-3.5 h-3.5" />
+            <span>Recent:</span>
+            {recentSearches.slice(0, 3).map((s, i) => (
+              <span key={i} className="glass rounded-full px-3 py-1 text-xs text-silver hover:text-frost cursor-pointer transition-colors">
+                {s}
               </span>
+            ))}
+          </motion.div>
+        )}
+
+        {/* Scroll indicator */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 2 }}
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
+        >
+          <span className="text-xs text-ash">Scroll to explore</span>
+          <motion.div
+            animate={{ y: [0, 8, 0] }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+            className="w-5 h-8 rounded-full border border-white/10 flex items-start justify-center p-1"
+          >
+            <div className="w-1 h-2 rounded-full bg-cyan-glow/50" />
+          </motion.div>
+        </motion.div>
+      </motion.section>
+
+      {/* ═══ STATS BAR ═══ */}
+      <section className="relative z-10 py-16 px-6">
+        <div className="max-w-5xl mx-auto">
+          <GlassCard className="p-8 rounded-3xl">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+              <StatBlock value="137+" label="Indian Airports" delay={0} />
+              <StatBlock value="24/7" label="Live Flight Data" delay={0.1} />
+              <StatBlock value="₹0" label="Booking Fee" delay={0.2} />
+              <StatBlock value="50K+" label="Routes Tracked" delay={0.3} />
             </div>
-            <p className="text-gray-400 max-w-sm leading-relaxed text-lg">
-              The smartest way to search flights, map seats, and process split settlements across India natively in React.
+          </GlassCard>
+        </div>
+      </section>
+
+      {/* ═══ FEATURES GRID ═══ */}
+      <section className="relative z-10 py-24 px-6">
+        <div className="max-w-6xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <span className="text-sm font-semibold text-cyan-glow uppercase tracking-widest mb-3 block">
+              Why TravelWise
+            </span>
+            <h2 className="text-3xl md:text-5xl font-black font-display gradient-text-frost mb-4">
+              Everything you need to fly smart
+            </h2>
+            <p className="text-silver max-w-xl mx-auto">
+              From finding the cheapest fare to tracking your flight in real time — we have it all covered.
             </p>
-          </div>
-          <div>
-            <h4 className="text-white font-bold mb-6 tracking-wide text-sm">RESOURCES</h4>
-            <ul className="space-y-4 text-gray-400 font-medium">
-              <li><a href="#" className="hover:text-white transition-colors">Amadeus API Layer</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">RailYatri Connector</a></li>
-              <li><a href="/airport-info" className="hover:text-white transition-colors">Airport Database</a></li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="text-white font-bold mb-6 tracking-wide text-sm">SECURITY</h4>
-            <ul className="space-y-4 text-gray-400 font-medium">
-              <li><span className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-green-500"></div> PostgreSQL Connected</span></li>
-              <li><span className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-blue-500"></div> Redis Active</span></li>
-              <li><span className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-[#EA4335]"></div> Firebase Auth Active</span></li>
-            </ul>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <FeatureCard
+              icon={<BarChart3 className="w-6 h-6 text-cyan-glow" />}
+              title="Live Price Tracker"
+              description="Watch price changes over 7 days with interactive charts. Set alerts and book when the price drops."
+              delay={0}
+            />
+            <FeatureCard
+              icon={<Calendar className="w-6 h-6 text-cyan-glow" />}
+              title="Fare Calendar"
+              description="See the cheapest day to fly at a glance. Our monthly grid shows you exactly when to book."
+              delay={0.1}
+            />
+            <FeatureCard
+              icon={<Globe className="w-6 h-6 text-cyan-glow" />}
+              title="Live Flight Tracking"
+              description="Track any flight across India in real time with altitude, speed, and ETA data on an interactive map."
+              delay={0.2}
+            />
+            <FeatureCard
+              icon={<Sparkles className="w-6 h-6 text-amber-glow" />}
+              title="AI Trip Suggester"
+              description="Tell us your budget and vibe — beach, mountains, city — and we'll find the perfect destinations."
+              delay={0.3}
+            />
+            <FeatureCard
+              icon={<Zap className="w-6 h-6 text-amber-glow" />}
+              title="Flexible Dates"
+              description="±3 days flexible search finds you the cheapest date combination automatically."
+              delay={0.4}
+            />
+            <FeatureCard
+              icon={<Shield className="w-6 h-6 text-amber-glow" />}
+              title="Transparent Pricing"
+              description="Total cost upfront with baggage included. No hidden fees, no surprises at checkout."
+              delay={0.5}
+            />
           </div>
         </div>
-        <div className="max-w-7xl mx-auto border-t border-gray-800 pt-8 flex justify-between items-center text-gray-500 text-sm">
-          <p>© 2026 TravelWise. Microservices Architecture Demo.</p>
-          <div className="flex gap-4">
-            <span>Powered by Razorpay</span>
+      </section>
+
+      {/* ═══ CTA SECTION ═══ */}
+      <section className="relative z-10 py-24 px-6">
+        <div className="max-w-4xl mx-auto text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <GlassCard className="p-12 md:p-16 rounded-3xl relative overflow-hidden" glow="cyan">
+              <div className="absolute inset-0 bg-gradient-to-br from-cyan-glow/5 via-transparent to-indigo-glow/5" />
+              <div className="relative z-10">
+                <h2 className="text-3xl md:text-4xl font-black font-display gradient-text-frost mb-4">
+                  Ready to find your next flight?
+                </h2>
+                <p className="text-silver mb-8 max-w-md mx-auto">
+                  Join thousands of smart travelers who save time and money with TravelWise.
+                </p>
+                <div className="flex flex-wrap gap-4 justify-center">
+                  <Link href="/search" className="btn-primary flex items-center gap-2 py-3 px-8">
+                    <Search className="w-4 h-4" /> Search Flights
+                  </Link>
+                  <Link href="/auth" className="btn-ghost flex items-center gap-2 py-3 px-8">
+                    Create Account <ChevronRight className="w-4 h-4" />
+                  </Link>
+                </div>
+              </div>
+            </GlassCard>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ═══ FOOTER ═══ */}
+      <footer className="relative z-10 border-t border-white/5 py-12 px-6">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+          <div className="flex flex-col items-center md:items-start gap-1">
+            <span className="font-bold font-display text-frost">
+              travel<span className="text-cyan-glow">wise</span>
+            </span>
+            <p className="text-xs text-ash">© 2024 TravelWise. Smart flights for smart travelers.</p>
+          </div>
+          <div className="flex gap-8 text-sm">
+            <Link href="#" className="text-ash hover:text-frost transition-colors">Privacy</Link>
+            <Link href="#" className="text-ash hover:text-frost transition-colors">Terms</Link>
+            <Link href="#" className="text-ash hover:text-frost transition-colors">Contact</Link>
+            <Link href="#" className="text-ash hover:text-frost transition-colors">About</Link>
           </div>
         </div>
       </footer>

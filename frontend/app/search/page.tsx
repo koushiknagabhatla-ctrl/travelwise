@@ -1,12 +1,20 @@
 "use client";
 
-import { useEffect, useState, Suspense } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
-import axios from 'axios';
-import { PlaneTakeoff, Train, Clock, ArrowRight, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { useEffect, useState, Suspense } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
+import axios from "axios";
+import NavHeader from "../components/ui/nav-header";
+import { GlassCard } from "../components/ui/glass-card";
+import {
+  Plane, Clock, ArrowRight, Shield, CheckCircle2, Filter,
+  Cloud, TrendingDown, Eye, AlertTriangle, Luggage, ChevronDown,
+  Users, Star
+} from "lucide-react";
 
-interface SeatClass { name: string; price: number; }
-interface TravelResult {
+const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5002";
+
+interface FlightResult {
   id: string;
   mode: string;
   carrier: string;
@@ -17,169 +25,277 @@ interface TravelResult {
   stops: string;
   onTimeRating: string;
   baggage: string;
-  classes: SeatClass[];
+  classes: { name: string; price: number; currency?: string }[];
+  totalAmount?: string;
+  currency?: string;
 }
 
-function SearchResultsContent() {
+function SearchContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  
-  const mode = searchParams.get('mode') || 'flights';
-  const carrier = searchParams.get('carrier') || 'IndiGo';
-  const from = searchParams.get('from') || 'DEL';
-  const to = searchParams.get('to') || 'BOM';
-  const date = searchParams.get('date') || '';
-  const pax = searchParams.get('pax') || '1';
+  const from = searchParams.get("from") || "DEL";
+  const to = searchParams.get("to") || "BOM";
+  const date = searchParams.get("date") || "";
+  const pax = searchParams.get("pax") || "1";
+  const carrier = searchParams.get("carrier") || "All";
 
-  const [results, setResults] = useState<TravelResult[]>([]);
+  const [results, setResults] = useState<FlightResult[]>([]);
   const [loading, setLoading] = useState(true);
+  const [weather, setWeather] = useState<any>(null);
+  const [sortBy, setSortBy] = useState<"price" | "duration">("price");
+  const [viewerCount] = useState(Math.floor(Math.random() * 40) + 12);
 
   useEffect(() => {
     const fetchResults = async () => {
       try {
-        const response = await axios.get(`http://localhost:5002/api/search`, {
-          params: { mode, carrier, from, to, date, pax },
-          withCredentials: true
+        const response = await axios.get(`${API}/api/search`, {
+          params: { mode: "flights", carrier, from, to, date, pax },
+          withCredentials: true,
         });
-        setResults(response.data.data);
+        setResults(response.data.data || []);
       } catch (error) {
-        console.error("Search Gateway Error:", error);
+        console.error("Search error:", error);
       } finally {
         setLoading(false);
       }
     };
     fetchResults();
-  }, [mode, carrier, from, to, date, pax]);
+  }, [from, to, date, pax, carrier]);
 
-  const handleSeatSelection = (result: TravelResult, price: number) => {
-    router.push(`/seat-selection?mode=${result.mode}&operatorNo=${result.flightNumber}&from=${from}&destination=${to}&price=${price}&date=${date}`);
+  // Fetch destination weather
+  useEffect(() => {
+    const fetchWeather = async () => {
+      try {
+        const airportsRes = await axios.get(`${API}/api/airports`);
+        const airport = airportsRes.data.data?.find((a: any) => a.code === to);
+        if (airport) {
+          const weatherRes = await axios.get(`${API}/api/weather`, {
+            params: { lat: airport.lat, lon: airport.lng },
+          });
+          setWeather(weatherRes.data.data);
+        }
+      } catch (e) {
+        console.log("Weather unavailable");
+      }
+    };
+    fetchWeather();
+  }, [to]);
+
+  const handleSelect = (result: FlightResult, price: number) => {
+    // Save to recent searches
+    const recent = JSON.parse(localStorage.getItem("travelwise_recent") || "[]");
+    const searchStr = `${from} → ${to}`;
+    if (!recent.includes(searchStr)) {
+      recent.unshift(searchStr);
+      localStorage.setItem("travelwise_recent", JSON.stringify(recent.slice(0, 5)));
+    }
+
+    router.push(
+      `/seat-selection?mode=flights&operatorNo=${result.flightNumber}&from=${from}&destination=${to}&price=${price}&date=${date}`
+    );
   };
 
+  const sortedResults = [...results].sort((a, b) => {
+    if (sortBy === "price") return (a.classes[0]?.price || 0) - (b.classes[0]?.price || 0);
+    return 0;
+  });
+
   return (
-    <div className="bg-gray-50 min-h-screen text-navy pb-24">
-      {/* HEADER WIDGET */}
-      <div className="bg-navy text-white pt-10 pb-16 px-6 shadow-md">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-6">
-            <div className="bg-white/10 p-4 rounded-xl backdrop-blur-sm">
-              {mode === 'flights' ? <PlaneTakeoff size={32} className="text-accent" /> : <Train size={32} className="text-accent" />}
-            </div>
+    <div className="min-h-screen bg-void">
+      <NavHeader />
+
+      {/* Header */}
+      <div className="pt-24 pb-8 px-6 border-b border-white/5">
+        <div className="max-w-6xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex flex-col md:flex-row md:items-center justify-between gap-4"
+          >
             <div>
-              <h1 className="text-3xl font-black mb-1 flex items-center gap-3">
-                {from} <ArrowRight className="text-gray-400" /> {to}
+              <h1 className="text-3xl font-black font-display text-frost flex items-center gap-3">
+                {from} <ArrowRight className="text-cyan-glow" /> {to}
               </h1>
-              <p className="text-gray-400 font-medium">
-                {new Date(date).toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}  ·  {pax} Passenger(s)
+              <p className="text-silver mt-1">
+                {date && new Date(date).toLocaleDateString("en-IN", {
+                  weekday: "long", day: "numeric", month: "long", year: "numeric"
+                })} · {pax} Traveler{Number(pax) > 1 ? "s" : ""}
               </p>
             </div>
-          </div>
-          <div className="hidden md:flex flex-col items-end gap-1">
-            <div className="bg-white text-navy font-bold text-sm px-3 py-1 rounded-full">{carrier}</div>
-            <span className="text-green-400 font-semibold text-sm flex items-center gap-1"><ShieldCheck size={16} /> Amadeus Live</span>
-          </div>
+            <div className="flex items-center gap-3">
+              <div className="glass rounded-full px-3 py-1.5 flex items-center gap-2 text-sm">
+                <Eye className="w-3.5 h-3.5 text-amber-glow" />
+                <span className="text-silver">{viewerCount} people viewing</span>
+              </div>
+              <div className="glass rounded-full px-3 py-1.5 flex items-center gap-2 text-sm">
+                <Shield className="w-3.5 h-3.5 text-cyan-glow" />
+                <span className="text-cyan-glow font-semibold">Price Guarantee</span>
+              </div>
+            </div>
+          </motion.div>
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-6 -mt-8 flex gap-8 items-start">
-        {/* FILTERS SIDEBAR */}
-        <div className="hidden lg:block w-72 bg-white p-6 rounded-2xl shadow-soft border border-gray-100 flex-shrink-0">
-          <h3 className="font-bold text-lg mb-6 flex items-center gap-2"><Clock size={20} className="text-accent" /> Filter Results</h3>
-          <div className="space-y-6">
-            <div>
-              <h4 className="font-semibold text-gray-500 mb-3 text-sm">STOPS</h4>
-              <label className="flex items-center gap-3 mb-2 cursor-pointer"><input type="checkbox" defaultChecked className="w-4 h-4 text-accent rounded focus:ring-accent" /><span className="text-sm font-medium">Direct</span></label>
-              <label className="flex items-center gap-3 mb-2 cursor-pointer"><input type="checkbox" defaultChecked className="w-4 h-4 text-accent rounded focus:ring-accent" /><span className="text-sm font-medium">1 Stop</span></label>
-            </div>
-            <div className="h-px bg-gray-100 my-4" />
-            <div>
-              <h4 className="font-semibold text-gray-500 mb-3 text-sm">DEPARTURE TIME</h4>
-              <label className="flex items-center gap-3 mb-2 cursor-pointer"><input type="checkbox" className="w-4 h-4 text-accent" /><span className="text-sm font-medium">Morning (06:00 - 12:00)</span></label>
-              <label className="flex items-center gap-3 mb-2 cursor-pointer"><input type="checkbox" className="w-4 h-4 text-accent" /><span className="text-sm font-medium">Afternoon (12:00 - 18:00)</span></label>
-              <label className="flex items-center gap-3 mb-2 cursor-pointer"><input type="checkbox" className="w-4 h-4 text-accent" /><span className="text-sm font-medium">Evening (18:00 - 00:00)</span></label>
-            </div>
+      <div className="max-w-6xl mx-auto px-6 py-8 flex gap-6">
+        {/* Sidebar */}
+        <div className="hidden lg:block w-72 flex-shrink-0">
+          <div className="sticky top-28 space-y-4">
+            {/* Weather Widget */}
+            {weather && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                <GlassCard className="p-4">
+                  <h3 className="text-sm font-bold text-frost flex items-center gap-2 mb-3">
+                    <Cloud className="w-4 h-4 text-cyan-glow" /> Weather at {to}
+                  </h3>
+                  <div className="flex items-center gap-3">
+                    {weather.iconUrl && (
+                      <img src={weather.iconUrl} alt={weather.description} className="w-12 h-12" />
+                    )}
+                    <div>
+                      <div className="text-2xl font-black text-frost">{weather.temp}°C</div>
+                      <div className="text-xs text-silver capitalize">{weather.description}</div>
+                    </div>
+                  </div>
+                  <div className="flex gap-4 mt-3 text-xs text-ash">
+                    <span>💧 {weather.humidity}%</span>
+                    <span>💨 {weather.windSpeed} m/s</span>
+                  </div>
+                </GlassCard>
+              </motion.div>
+            )}
+
+            {/* Filters */}
+            <GlassCard className="p-4">
+              <h3 className="text-sm font-bold text-frost flex items-center gap-2 mb-4">
+                <Filter className="w-4 h-4 text-cyan-glow" /> Filters
+              </h3>
+              <div className="space-y-4">
+                <div>
+                  <h4 className="text-xs font-semibold text-ash uppercase tracking-wider mb-2">Stops</h4>
+                  {["Direct", "1 Stop", "2+ Stops"].map((stop) => (
+                    <label key={stop} className="flex items-center gap-2 mb-2 cursor-pointer text-sm text-silver hover:text-frost transition-colors">
+                      <input type="checkbox" defaultChecked className="w-3.5 h-3.5 rounded accent-cyan-glow" />
+                      {stop}
+                    </label>
+                  ))}
+                </div>
+                <div className="h-px bg-white/5" />
+                <div>
+                  <h4 className="text-xs font-semibold text-ash uppercase tracking-wider mb-2">Sort By</h4>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value as "price" | "duration")}
+                    className="w-full input-glass text-sm py-2"
+                  >
+                    <option value="price" className="bg-onyx">Lowest Price</option>
+                    <option value="duration" className="bg-onyx">Shortest Duration</option>
+                  </select>
+                </div>
+              </div>
+            </GlassCard>
+
+            {/* Trust badges */}
+            <GlassCard className="p-4 space-y-3">
+              <div className="flex items-center gap-2 text-xs">
+                <Shield className="w-4 h-4 text-cyan-glow" />
+                <span className="text-silver">Free cancellation on select fares</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs">
+                <TrendingDown className="w-4 h-4 text-cyan-glow" />
+                <span className="text-silver">Best price guarantee</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs">
+                <Luggage className="w-4 h-4 text-amber-glow" />
+                <span className="text-silver">Baggage included in price</span>
+              </div>
+            </GlassCard>
           </div>
         </div>
 
-        {/* RESULTS FEED */}
+        {/* Results Feed */}
         <div className="flex-1 space-y-4">
           {loading ? (
-            Array(3).fill(0).map((_, i) => (
-              <div key={i} className="bg-white h-48 rounded-2xl border border-gray-100 shadow-sm animate-pulse flex p-6 gap-6">
-                <div className="w-16 h-16 bg-gray-100 rounded-full" />
-                <div className="flex-1 space-y-4">
-                  <div className="h-6 w-1/3 bg-gray-100 rounded" />
-                  <div className="h-20 bg-gray-50 rounded" />
-                </div>
-              </div>
+            Array(4).fill(0).map((_, i) => (
+              <div key={i} className="glass-card rounded-2xl h-40 animate-shimmer" />
             ))
-          ) : results.length === 0 ? (
-            <div className="bg-white p-12 text-center rounded-2xl shadow-soft">
-              <span className="text-5xl mb-4 block">✈️</span>
-              <h3 className="text-2xl font-bold mb-2">No Routes Found</h3>
-              <p className="text-gray-500">We couldn't connect to remote Amadeus servers for this date.</p>
-            </div>
+          ) : sortedResults.length === 0 ? (
+            <GlassCard className="p-12 text-center">
+              <Plane className="w-12 h-12 text-ash mx-auto mb-4" />
+              <h3 className="text-xl font-bold text-frost mb-2">No flights found</h3>
+              <p className="text-silver">Try adjusting your search dates or route.</p>
+            </GlassCard>
           ) : (
-            results.map((result) => (
-              <div key={result.id} className="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-soft transition-shadow overflow-hidden flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x divide-gray-100">
-                
-                {/* Flight Data Left */}
-                <div className="p-6 flex-1 flex flex-col justify-between gap-6">
-                  <div className="flex justify-between items-start">
-                    <div className="flex gap-4 items-center">
-                      <div className="w-12 h-12 rounded-lg bg-navy/5 flex items-center justify-center font-bold text-navy text-sm border border-navy/10">
-                        {result.carrier.substring(0,2).toUpperCase()}
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-lg text-navy">{result.carrier}</h3>
-                        <p className="text-gray-500 text-sm font-medium">{result.flightNumber}  ·  {result.baggage}</p>
-                      </div>
-                    </div>
-                    <div className="bg-green-50 text-green-600 font-bold text-xs px-2 py-1 flex items-center gap-1 rounded">
-                      <CheckCircle2 size={14} /> ON TIME {result.onTimeRating}
-                    </div>
-                  </div>
+            <AnimatePresence>
+              {sortedResults.map((result, idx) => (
+                <motion.div
+                  key={result.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.08 }}
+                >
+                  <GlassCard className="p-0 overflow-hidden hover:border-cyan-glow/20" hover>
+                    <div className="flex flex-col md:flex-row">
+                      {/* Flight Info */}
+                      <div className="flex-1 p-6">
+                        <div className="flex justify-between items-start mb-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl glass-md flex items-center justify-center text-sm font-bold text-cyan-glow">
+                              {result.carrier.substring(0, 2).toUpperCase()}
+                            </div>
+                            <div>
+                              <h3 className="font-bold text-frost">{result.carrier}</h3>
+                              <p className="text-xs text-ash">{result.flightNumber} · {result.baggage}</p>
+                            </div>
+                          </div>
+                          {idx === 0 && (
+                            <span className="glass rounded-full px-2.5 py-1 text-xs font-bold text-cyan-glow flex items-center gap-1">
+                              <Star className="w-3 h-3" /> Best Value
+                            </span>
+                          )}
+                        </div>
 
-                  <div className="flex items-center justify-between text-center px-4">
-                    <div>
-                      <div className="text-2xl font-black text-navy">{result.departure}</div>
-                      <div className="text-gray-500 font-semibold">{from}</div>
-                    </div>
-                    <div className="flex-1 px-8 relative flex flex-col items-center">
-                      <span className="text-xs font-bold text-gray-400 mb-1">{result.duration}</span>
-                      <div className="w-full h-[2px] bg-gray-200 relative">
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white px-2 text-gray-400">
-                          {mode === 'flights' ? <PlaneTakeoff size={18} /> : <Train size={18} />}
+                        <div className="flex items-center gap-4">
+                          <div className="text-center">
+                            <div className="text-xl font-black text-frost">{result.departure}</div>
+                            <div className="text-xs text-ash font-medium">{from}</div>
+                          </div>
+                          <div className="flex-1 flex flex-col items-center px-4">
+                            <span className="text-xs text-ash mb-1">{result.duration}</span>
+                            <div className="w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent relative">
+                              <Plane className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 text-cyan-glow bg-onyx rounded-full p-0.5" />
+                            </div>
+                            <span className="text-xs text-cyan-glow font-semibold mt-1">{result.stops}</span>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-xl font-black text-frost">{result.arrival}</div>
+                            <div className="text-xs text-ash font-medium">{to}</div>
+                          </div>
                         </div>
                       </div>
-                      <span className="text-xs font-bold text-accent mt-1">{result.stops}</span>
-                    </div>
-                    <div>
-                      <div className="text-2xl font-black text-navy">{result.arrival}</div>
-                      <div className="text-gray-500 font-semibold">{to}</div>
-                    </div>
-                  </div>
-                </div>
 
-                {/* Price Interaction Right */}
-                <div className="bg-gray-50 p-6 flex flex-col justify-center gap-3 w-full md:w-64 shrink-0">
-                  {result.classes.map(cls => (
-                    <button 
-                      key={cls.name}
-                      onClick={() => handleSeatSelection(result, cls.price)}
-                      className="w-full bg-white border-2 border-transparent hover:border-accent shadow-sm rounded-xl p-3 text-left transition-all hover:shadow-accent group flex justify-between items-center"
-                    >
-                      <div>
-                        <div className="font-bold text-navy text-sm">{cls.name}</div>
-                        <div className="text-accent font-black text-lg group-hover:text-accent-hover">₹{cls.price.toLocaleString('en-IN')}</div>
+                      {/* Price Panel */}
+                      <div className="md:w-56 p-4 md:border-l border-t md:border-t-0 border-white/5 bg-white/[0.02] flex flex-col justify-center gap-2">
+                        {result.classes.map((cls) => (
+                          <button
+                            key={cls.name}
+                            onClick={() => handleSelect(result, cls.price)}
+                            className="w-full glass rounded-xl p-3 text-left hover:border-cyan-glow/30 transition-all group cursor-pointer flex justify-between items-center"
+                          >
+                            <div>
+                              <div className="text-xs text-ash">{cls.name}</div>
+                              <div className="text-lg font-black text-cyan-glow">
+                                {cls.currency || "₹"}{cls.price.toLocaleString("en-IN")}
+                              </div>
+                            </div>
+                            <ArrowRight className="w-4 h-4 text-ash group-hover:text-cyan-glow transition-colors" />
+                          </button>
+                        ))}
                       </div>
-                      <ArrowRight size={18} className="text-gray-300 group-hover:text-accent transition-colors" />
-                    </button>
-                  ))}
-                  <p className="text-center text-xs text-gray-400 font-medium mt-1">Free 10-Minute UI Seat Lock</p>
-                </div>
-                
-              </div>
-            ))
+                    </div>
+                  </GlassCard>
+                </motion.div>
+              ))}
+            </AnimatePresence>
           )}
         </div>
       </div>
@@ -189,8 +305,17 @@ function SearchResultsContent() {
 
 export default function SearchResults() {
   return (
-    <Suspense fallback={<div className="h-screen flex items-center justify-center text-navy font-bold">Querying Amadeus Infrastructure...</div>}>
-      <SearchResultsContent />
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-void flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-10 h-10 rounded-full border-2 border-cyan-glow border-t-transparent animate-spin mx-auto mb-4" />
+            <p className="text-frost font-semibold">Searching flights...</p>
+          </div>
+        </div>
+      }
+    >
+      <SearchContent />
     </Suspense>
   );
 }
